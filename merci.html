@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Merci ! Candidature enregistrée | Wicka Assistance</title>
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+  <meta name="theme-color" content="#9f1239" />
+  <style>
+    .thanks-page { min-height: 100vh; display: flex; flex-direction: column; background: linear-gradient(160deg, var(--rose-soft) 0%, #ffffff 60%); }
+    .thanks-header { padding: 18px 0; border-bottom: 1px solid var(--rose-100); background: var(--white); }
+    .thanks-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 0; }
+    .thanks-card { background: var(--white); border: 1px solid var(--rose-100); border-radius: var(--radius-xl); box-shadow: var(--shadow-xl); max-width: 640px; width: 100%; padding: 44px 40px; text-align: center; }
+    .thanks-check { width: 92px; height: 92px; margin: 0 auto 22px; border-radius: 50%; background: var(--success-bg); color: var(--success); display: flex; align-items: center; justify-content: center; font-size: 3rem; animation: pop .5s cubic-bezier(.16,1,.3,1); }
+    @keyframes pop { 0% { transform: scale(.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    .thanks-card h1 { font-size: 2.1rem; margin-bottom: 10px; }
+    .thanks-card .lead { color: var(--slate-600); font-size: 1.02rem; margin-bottom: 26px; }
+    .thanks-recap { text-align: left; background: var(--rose-50); border: 1px solid var(--rose-100); border-radius: var(--radius-md); padding: 18px 20px; margin-bottom: 26px; }
+    .thanks-recap .summary-row { border-bottom: 1px dashed var(--rose-200); }
+    .thanks-recap .summary-row:last-child { border-bottom: none; }
+    .thanks-steps { text-align: left; display: grid; gap: 14px; margin: 8px 0 28px; }
+    .thanks-step { display: flex; gap: 14px; align-items: flex-start; }
+    .thanks-step-num { flex: 0 0 34px; height: 34px; border-radius: 50%; background: var(--rose-800); color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); }
+    .thanks-step h4 { font-size: .98rem; margin-bottom: 2px; }
+    .thanks-step p { font-size: .85rem; color: var(--slate-500); }
+    .thanks-actions { display: flex; flex-direction: column; gap: 12px; }
+    .thanks-note { font-size: .82rem; color: var(--slate-500); margin-top: 18px; }
+  </style>
+</head>
+<body>
+  <div class="thanks-page">
+    <header class="thanks-header">
+      <div class="container">
+        <a href="index.html" class="brand-logo">
+          <div class="brand-crest"><i class="fas fa-graduation-cap"></i></div>
+          <div class="brand-text-wrap">
+            <span class="brand-title">WICKA<span class="text-rose">.</span></span>
+            <span class="brand-subtitle">Assistance Maroc</span>
+          </div>
+        </a>
+      </div>
+    </header>
+
+    <main class="thanks-main">
+      <div class="container">
+        <div class="thanks-card">
+          <div class="thanks-check"><i class="fas fa-check"></i></div>
+          <h1 id="thanksTitle">Merci ! 🎉</h1>
+          <p class="lead" id="thanksLead">Votre candidature a bien été enregistrée. Un conseiller Wicka Assistance vous contacte sous 24h.</p>
+
+          <div class="thanks-recap" id="thanksRecap" style="display:none;"></div>
+
+          <div class="thanks-steps">
+            <div class="thanks-step">
+              <div class="thanks-step-num">1</div>
+              <div><h4>Finalisez sur WhatsApp maintenant</h4><p>Envoyez votre récap à notre conseiller pour un traitement prioritaire et bloquer votre tarif promo −50%.</p></div>
+            </div>
+            <div class="thanks-step">
+              <div class="thanks-step-num">2</div>
+              <div><h4>Étude de votre dossier</h4><p>Nous analysons votre profil et sélectionnons les meilleures universités privées pour vous.</p></div>
+            </div>
+            <div class="thanks-step">
+              <div class="thanks-step-num">3</div>
+              <div><h4>Réponse sous 24h</h4><p>Vous recevez votre évaluation et votre devis dans votre monnaie locale.</p></div>
+            </div>
+          </div>
+
+          <div class="thanks-actions">
+            <a id="thanksWhatsapp" href="https://wa.me/212771674815" target="_blank" class="btn-primary btn-full" style="background:#25D366;border-color:#25D366;">
+              <i class="fab fa-whatsapp"></i> <span>Finaliser sur WhatsApp (+212 7 71 67 48 15)</span>
+            </a>
+            <a href="index.html" class="btn-secondary btn-full">
+              <i class="fas fa-arrow-left"></i> <span>Retour à l'accueil</span>
+            </a>
+          </div>
+
+          <p class="thanks-note"><i class="fas fa-lock"></i> Vos données sont confidentielles et ne servent qu'aux démarches d'admission.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      var PHONE = '212771674815';
+      var data = null;
+      try { data = JSON.parse(sessionStorage.getItem('wickaApplication') || 'null'); } catch (e) {}
+
+      var waLink = document.getElementById('thanksWhatsapp');
+      var recap = document.getElementById('thanksRecap');
+      var title = document.getElementById('thanksTitle');
+      var lead = document.getElementById('thanksLead');
+
+      if (data && data.fullName) {
+        var first = String(data.fullName).trim().split(' ')[0];
+        if (first) title.innerHTML = 'Merci ' + first + ' ! 🎉';
+        lead.textContent = 'Votre candidature est bien enregistrée. Dernière étape : finalisez sur WhatsApp pour un traitement prioritaire.';
+
+        recap.style.display = 'block';
+        recap.innerHTML =
+          '<div class="summary-row"><strong>Nom complet :</strong> <span>' + esc(data.fullName) + '</span></div>' +
+          '<div class="summary-row"><strong>Pays :</strong> <span>' + esc(data.country) + '</span></div>' +
+          '<div class="summary-row"><strong>Filière visée :</strong> <span>' + esc(data.studyDomain) + '</span></div>' +
+          '<div class="summary-row"><strong>Université :</strong> <span>' + esc(data.targetUniversity) + '</span></div>' +
+          '<div class="summary-row"><strong>Formule :</strong> <span>' + esc(data.selectedPack) + '</span></div>' +
+          '<div class="summary-row"><strong>Navette aéroport :</strong> <span>' + esc(data.airportTransfer) + '</span></div>';
+
+        var msg = 'Bonjour Wicka Assistance ! 👋\nJe viens de soumettre ma candidature pour étudier au Maroc.\n\n' +
+          '👤 Nom : ' + data.fullName + '\n' +
+          '🌍 Pays : ' + data.country + '\n' +
+          '🎓 Niveau : ' + data.currentLevel + ' (' + data.bacSeries + ')\n' +
+          '📚 Filière : ' + data.studyDomain + '\n' +
+          '🏫 Établissement : ' + data.targetUniversity + '\n' +
+          '📦 Formule : ' + data.selectedPack + '\n' +
+          '🚗 Navette Aéroport : ' + data.airportTransfer + '\n\n' +
+          'Merci de m\'indiquer la suite des démarches !';
+        waLink.href = 'https://wa.me/' + PHONE + '?text=' + encodeURIComponent(msg);
+      } else {
+        waLink.href = 'https://wa.me/' + PHONE + '?text=' + encodeURIComponent('Bonjour Wicka Assistance, je souhaite finaliser ma candidature pour étudier au Maroc.');
+      }
+
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

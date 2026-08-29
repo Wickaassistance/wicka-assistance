@@ -1,0 +1,843 @@
+/**
+ * Wicka Assistance - Scripts et Logique Interactive (Version Enrichie)
+ * Tarifs par Pays, Simulateur, Filtre Universités d'Élite, Transport Aéroport & Formulaire
+ */
+
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Initialisations
+  initNavigation();
+  initCounters();
+  initCountryPricingSwitcher();
+  initUniversityFilters();
+  initBudgetSimulator();
+  initMultiStepForm();
+  initFaqAccordion();
+  initTestimonials();
+  initSocialProofToasts();
+  initModals();
+  initPromoCountdown();
+});
+
+/* ============================================================
+   COMPTE À REBOURS PROMOTION
+   ============================================================ */
+function initPromoCountdown() {
+  const el = document.getElementById('promoCountdown');
+  if (!el) return;
+  const deadline = new Date(el.getAttribute('data-deadline')).getTime();
+  const dEl = document.getElementById('pcDays');
+  const hEl = document.getElementById('pcHours');
+  const mEl = document.getElementById('pcMins');
+  const sEl = document.getElementById('pcSecs');
+  const pad = (n) => String(n).padStart(2, '0');
+
+  const tick = () => {
+    let diff = deadline - Date.now();
+    if (diff < 0) diff = 0;
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    if (dEl) dEl.innerText = pad(d);
+    if (hEl) hEl.innerText = pad(h);
+    if (mEl) mEl.innerText = pad(m);
+    if (sEl) sEl.innerText = pad(s);
+  };
+
+  tick();
+  setInterval(tick, 1000);
+}
+
+/* ============================================================
+   1. NAVIGATION & HEADER
+   ============================================================ */
+function initNavigation() {
+  const header = document.querySelector('.site-header');
+  const mobileToggle = document.getElementById('mobileMenuToggle');
+  const mobileMenu = document.getElementById('mobileMenu');
+  const mobileLinks = document.querySelectorAll('.mobile-nav-link');
+
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 40) {
+      header.classList.add('scrolled');
+    } else {
+      header.classList.remove('scrolled');
+    }
+  });
+
+  if (mobileToggle && mobileMenu) {
+    mobileToggle.addEventListener('click', () => {
+      mobileMenu.classList.toggle('active');
+      mobileToggle.classList.toggle('active');
+      document.body.classList.toggle('no-scroll');
+    });
+
+    mobileLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenu.classList.remove('active');
+        mobileToggle.classList.remove('active');
+        document.body.classList.remove('no-scroll');
+      });
+    });
+  }
+
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      const targetId = this.getAttribute('href');
+      if (targetId === '#' || targetId === '') return;
+      const targetElement = document.querySelector(targetId);
+      if (targetElement) {
+        e.preventDefault();
+        const headerOffset = 80;
+        const elementPosition = targetElement.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
+    });
+  });
+}
+
+/* ============================================================
+   2. COMPTEURS ANIMÉS (STATS HERO)
+   ============================================================ */
+function initCounters() {
+  const counters = document.querySelectorAll('.counter-value');
+  let animated = false;
+
+  const runAnimation = () => {
+    counters.forEach(counter => {
+      const target = +counter.getAttribute('data-target');
+      const suffix = counter.getAttribute('data-suffix') || '';
+      const prefix = counter.getAttribute('data-prefix') || '';
+      const duration = 1800;
+      const stepTime = 20;
+      const totalSteps = duration / stepTime;
+      const stepIncrement = target / totalSteps;
+      let current = 0;
+
+      const timer = setInterval(() => {
+        current += stepIncrement;
+        if (current >= target) {
+          counter.innerText = prefix + target.toLocaleString('fr-FR') + suffix;
+          clearInterval(timer);
+        } else {
+          counter.innerText = prefix + Math.floor(current).toLocaleString('fr-FR') + suffix;
+        }
+      }, stepTime);
+    });
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && !animated) {
+        runAnimation();
+        animated = true;
+      }
+    });
+  }, { threshold: 0.2 });
+
+  const statsSection = document.querySelector('.hero-stats-bar');
+  if (statsSection) {
+    observer.observe(statsSection);
+  }
+}
+
+/* ============================================================
+   3. SÉLECTEUR INTERACTIF DE TARIFS PAR PAYS
+   ============================================================ */
+function initCountryPricingSwitcher() {
+  const countrySelect = document.getElementById('pricingCountrySelect');
+  const countryPills = document.querySelectorAll('.country-pill-btn');
+  const outAdmissionPrice = document.getElementById('countryOutAdmissionPrice');
+  const outVipPrice = document.getElementById('countryOutVipPrice');
+  const outPaymentMethods = document.getElementById('countryOutPaymentMethods');
+  const outCountryNote = document.getElementById('countryOutNote');
+  const outCountryTitle = document.getElementById('countryOutTitle');
+
+  if (!window.WICKA_DATA || !window.WICKA_DATA.countryPricings) return;
+
+  const updateCountryView = (countryKey) => {
+    const data = window.WICKA_DATA.countryPricings[countryKey] || window.WICKA_DATA.countryPricings.senegal;
+    
+    const priceMarkup = (oldP, newP) => {
+      const oldHtml = oldP ? `<span class="price-old">${oldP}</span>` : '';
+      return `${oldHtml}<span class="price-now">${newP}</span><span class="price-promo-tag">PROMO -50%</span>`;
+    };
+
+    if (outCountryTitle) outCountryTitle.innerText = `Tarifs & Moyens de Paiement pour : ${data.name}`;
+    if (outAdmissionPrice) outAdmissionPrice.innerHTML = priceMarkup(data.packAdmissionOld, data.packAdmission);
+    if (outVipPrice) outVipPrice.innerHTML = priceMarkup(data.packVIPOld, data.packVIP);
+    if (outCountryNote) outCountryNote.innerText = data.note;
+
+    if (outPaymentMethods) {
+      outPaymentMethods.innerHTML = data.paymentMethods.map(m => `
+        <span class="payment-method-chip"><i class="fas fa-check-circle text-rose"></i> ${m}</span>
+      `).join('');
+    }
+
+    // Update buttons in pricing cards as well
+    document.querySelectorAll('.btn-order-pack').forEach(btn => {
+      const packType = btn.getAttribute('data-pack');
+      const waMsg = encodeURIComponent(`Bonjour Wicka Assistance ! Je réside en/au ${data.name} et je souhaite souscrire au ${packType} (${packType === 'Pack Admission' ? data.packAdmission : data.packVIP}).`);
+      btn.href = `https://wa.me/212771674815?text=${waMsg}`;
+    });
+  };
+
+  if (countrySelect) {
+    countrySelect.addEventListener('change', (e) => {
+      const val = e.target.value;
+      countryPills.forEach(p => p.classList.toggle('active', p.getAttribute('data-country') === val));
+      updateCountryView(val);
+    });
+  }
+
+  countryPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      countryPills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      const val = pill.getAttribute('data-country');
+      if (countrySelect) countrySelect.value = val;
+      updateCountryView(val);
+    });
+  });
+
+  // Init with default (Senegal or first)
+  updateCountryView('senegal');
+}
+
+/* ============================================================
+   4. FILTRES & RECHERCHE DES UNIVERSITÉS D'ÉLITE
+   ============================================================ */
+function initUniversityFilters() {
+  const container = document.getElementById('universitiesGrid');
+  const domainTabs = document.querySelectorAll('.filter-tab-btn');
+  const citySelect = document.getElementById('cityFilterSelect');
+  const searchInput = document.getElementById('universitySearchInput');
+  const resultsCount = document.getElementById('universitiesCount');
+
+  if (!container || !window.WICKA_DATA) return;
+
+  let currentDomain = 'all';
+  let currentCity = 'all';
+  let searchQuery = '';
+
+  const renderUniversities = () => {
+    const list = window.WICKA_DATA.universities.filter(uni => {
+      const matchDomain = (currentDomain === 'all' || uni.domain === currentDomain);
+      const matchCity = (currentCity === 'all' || uni.city === currentCity);
+      const matchSearch = searchQuery === '' || 
+        uni.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        uni.popularPrograms.some(p => p.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        uni.domainLabel.toLowerCase().includes(searchQuery.toLowerCase());
+
+      return matchDomain && matchCity && matchSearch;
+    });
+
+    if (resultsCount) {
+      resultsCount.innerText = `${list.length} université${list.length > 1 ? 's et grandes écoles d\'excellence trouvées' : ' trouvée'}`;
+    }
+
+    if (list.length === 0) {
+      container.innerHTML = `
+        <div class="empty-universities">
+          <div class="empty-icon"><i class="fas fa-university"></i></div>
+          <h3>Aucune université ne correspond exactement à vos critères</h3>
+          <p>Nos conseillers ont accès à plus de 45 partenariats non listés. Contactez-nous pour une orientation personnalisée !</p>
+          <a href="#candidature" class="btn-primary btn-sm">Demander un avis sur-mesure</a>
+        </div>
+      `;
+      return;
+    }
+
+    const cityPhotos = {
+      casablanca: 'assets/uni/casablanca.jpg',
+      rabat: 'assets/uni/rabat.jpg',
+      fes: 'assets/uni/fes.jpg',
+      marrakech: 'assets/uni/marrakech.jpg',
+      tanger: 'assets/uni/tanger.jpg',
+      ifrane: 'assets/uni/ifrane.jpg'
+    };
+
+    container.innerHTML = list.map(uni => {
+      const tagsHtml = uni.tags.map(t => `<span class="uni-tag">${t}</span>`).join('');
+      const programsHtml = uni.popularPrograms.map(p => `<li><i class="fas fa-check-circle text-rose"></i> ${p}</li>`).join('');
+      const photo = cityPhotos[uni.city] || 'assets/uni/campus1.jpg';
+
+      return `
+        <div class="university-card" data-domain="${uni.domain}" data-city="${uni.city}">
+          <div class="uni-card-media">
+            <img src="${photo}" alt="${uni.cityName}" loading="lazy" />
+            <span class="uni-media-city"><i class="fas fa-map-marker-alt"></i> ${uni.cityName}</span>
+            <span class="uni-media-rate"><i class="fas fa-circle-check"></i> ${uni.admissionRate}</span>
+          </div>
+          <div class="uni-card-header">
+            <div class="uni-badge-top">
+              <span class="uni-city-badge"><i class="fas fa-map-marker-alt"></i> ${uni.cityName}</span>
+              <span class="uni-type-badge">${uni.type}</span>
+            </div>
+            <h3 class="uni-name">${uni.name}</h3>
+            <p class="uni-domain-label"><i class="fas fa-graduation-cap"></i> ${uni.domainLabel}</p>
+          </div>
+
+          <div class="uni-card-body">
+            <div class="uni-tags-wrap">
+              ${tagsHtml}
+            </div>
+            <p class="uni-desc">${uni.description}</p>
+            
+            <div class="uni-programs-box">
+              <h4>Formations Phares :</h4>
+              <ul>${programsHtml}</ul>
+            </div>
+
+            <div class="uni-meta-grid">
+              <div class="meta-item">
+                <span class="meta-label">Frais indicatifs :</span>
+                <span class="meta-value">${uni.tuition}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Taux d'admission :</span>
+                <span class="meta-value text-success">${uni.admissionRate}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="uni-card-footer">
+            <button class="btn-select-uni" onclick="selectUniversityForApply('${uni.shortName}', '${uni.domain}')">
+              <span>Choisir cette université</span>
+              <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  };
+
+  domainTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      domainTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentDomain = tab.getAttribute('data-domain');
+      renderUniversities();
+    });
+  });
+
+  if (citySelect) {
+    citySelect.addEventListener('change', (e) => {
+      currentCity = e.target.value;
+      renderUniversities();
+    });
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.trim();
+      renderUniversities();
+    });
+  }
+
+  renderUniversities();
+}
+
+window.selectUniversityForApply = function(uniName, domain) {
+  const formSection = document.getElementById('candidature');
+  if (formSection) {
+    const headerOffset = 80;
+    const elementPosition = formSection.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+    window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+  }
+
+  const uniInput = document.getElementById('formTargetUniversity');
+  if (uniInput) {
+    uniInput.value = uniName;
+  }
+
+  const domainSelect = document.getElementById('formStudyDomain');
+  if (domainSelect && domain && domain !== 'all') {
+    domainSelect.value = domain;
+  }
+
+  showToastNotification(`🎯 Université "${uniName}" sélectionnée dans votre formulaire de candidature !`);
+};
+
+/* ============================================================
+   5. SIMULATEUR DE BUDGET & ÉTUDE SUR LA VIE AU MAROC
+   ============================================================ */
+function initBudgetSimulator() {
+  const citySelect = document.getElementById('simCitySelect');
+  const uniTypeRadios = document.querySelectorAll('input[name="simUniType"]');
+  const currencySelect = document.getElementById('simCurrencySelect');
+
+  const outFood = document.getElementById('simOutFood');
+  const outTransport = document.getElementById('simOutTransport');
+  const outLifestyle = document.getElementById('simOutLifestyle');
+  const outMonthlyLiving = document.getElementById('simOutMonthlyLiving');
+  const outTuitionYear = document.getElementById('simOutTuitionYear');
+  const outGrandTotalYear = document.getElementById('simOutGrandTotalYear');
+  const cityBadgeLabel = document.getElementById('simCityBadgeLabel');
+  const cityAdvantagesLabel = document.getElementById('simCityAdvantages');
+  const cityPhoto = document.getElementById('simCityPhoto');
+  const cityPhotoLabel = document.getElementById('simCityPhotoLabel');
+
+  if (!citySelect || !window.WICKA_DATA) return;
+
+  const calculateBudget = () => {
+    const selectedCityKey = citySelect.value || 'casablanca';
+    const cityData = window.WICKA_DATA.citiesCost[selectedCityKey] || window.WICKA_DATA.citiesCost.casablanca;
+    
+    // Type d'école
+    let selectedUniType = 'prive_standard';
+    uniTypeRadios.forEach(r => { if (r.checked) selectedUniType = r.value; });
+    
+    let annualTuitionMAD = 48000;
+    if (selectedUniType === 'prive_excellence') annualTuitionMAD = 68000;
+    if (selectedUniType === 'prive_standard') annualTuitionMAD = 46000;
+    if (selectedUniType === 'public_assiste') annualTuitionMAD = 3500;
+
+    const foodCostMAD = cityData.food;
+    const transportCostMAD = cityData.transport;
+    const lifestyleCostMAD = cityData.lifestyle;
+
+    const monthlyLivingMAD = foodCostMAD + transportCostMAD + lifestyleCostMAD;
+    const annualLivingMAD = monthlyLivingMAD * 10;
+    const grandTotalYearMAD = annualLivingMAD + annualTuitionMAD;
+
+    // Currency Conversion
+    const currentCurKey = currencySelect ? currencySelect.value : 'MAD';
+    let rate = 1;
+    let symbol = "DH";
+
+    if (currentCurKey === 'XOF') { rate = 60.5; symbol = "FCFA"; }
+    else if (currentCurKey === 'EUR') { rate = 0.092; symbol = "€"; }
+    else if (currentCurKey === 'USD') { rate = 0.10; symbol = "$"; }
+
+    const formatCur = (madAmount) => {
+      const converted = Math.round(madAmount * rate);
+      return `${converted.toLocaleString('fr-FR')} ${symbol}`;
+    };
+
+    if (cityBadgeLabel) cityBadgeLabel.innerText = cityData.badge;
+    if (cityAdvantagesLabel) cityAdvantagesLabel.innerText = cityData.advantages;
+    if (cityPhoto) cityPhoto.src = `assets/uni/${selectedCityKey}.jpg`;
+    if (cityPhotoLabel) cityPhotoLabel.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${cityData.name}`;
+    if (outFood) outFood.innerText = formatCur(foodCostMAD);
+    if (outTransport) outTransport.innerText = formatCur(transportCostMAD);
+    if (outLifestyle) outLifestyle.innerText = formatCur(lifestyleCostMAD);
+    if (outMonthlyLiving) outMonthlyLiving.innerText = formatCur(monthlyLivingMAD);
+    if (outTuitionYear) outTuitionYear.innerText = formatCur(annualTuitionMAD);
+    if (outGrandTotalYear) outGrandTotalYear.innerText = formatCur(grandTotalYearMAD);
+  };
+
+  citySelect.addEventListener('change', calculateBudget);
+  uniTypeRadios.forEach(r => r.addEventListener('change', calculateBudget));
+  if (currencySelect) currencySelect.addEventListener('change', calculateBudget);
+
+  const currencyChips = document.querySelectorAll('.currency-chip');
+  currencyChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      currencyChips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      const cur = chip.getAttribute('data-currency');
+      if (currencySelect) {
+        currencySelect.value = cur;
+        calculateBudget();
+      }
+    });
+  });
+
+  calculateBudget();
+}
+
+/* ============================================================
+   6. FORMULAIRE DE CANDIDATURE MULTI-ÉTAPES
+   ============================================================ */
+function initMultiStepForm() {
+  const form = document.getElementById('multiStepApplicationForm');
+  if (!form) return;
+
+  const steps = form.querySelectorAll('.form-step-panel');
+  const stepIndicators = document.querySelectorAll('.step-indicator-item');
+  const progressBar = document.getElementById('formProgressBar');
+  let currentStep = 1;
+  const totalSteps = steps.length;
+
+  const updateStepUI = (stepNumber) => {
+    steps.forEach(s => s.classList.remove('active'));
+    stepIndicators.forEach((ind, index) => {
+      ind.classList.remove('active', 'completed');
+      if (index + 1 < stepNumber) {
+        ind.classList.add('completed');
+      } else if (index + 1 === stepNumber) {
+        ind.classList.add('active');
+      }
+    });
+
+    const activePanel = form.querySelector(`.form-step-panel[data-step="${stepNumber}"]`);
+    if (activePanel) {
+      activePanel.classList.add('active');
+    }
+
+    if (progressBar) {
+      const progressPercent = ((stepNumber - 1) / (totalSteps - 1)) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+    }
+  };
+
+  const validateStep = (step) => {
+    const activePanel = form.querySelector(`.form-step-panel[data-step="${step}"]`);
+    if (!activePanel) return true;
+
+    const requiredInputs = activePanel.querySelectorAll('[required]');
+    let isValid = true;
+
+    requiredInputs.forEach(input => {
+      input.classList.remove('field-error');
+      if (!input.value.trim()) {
+        input.classList.add('field-error');
+        isValid = false;
+      }
+
+      if (input.type === 'email' && input.value.trim()) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(input.value.trim())) {
+          input.classList.add('field-error');
+          isValid = false;
+        }
+      }
+    });
+
+    if (!isValid) {
+      showToastNotification('⚠️ Veuillez remplir tous les champs obligatoires en rose.', 'warning');
+    }
+
+    return isValid;
+  };
+
+  form.querySelectorAll('.btn-next-step').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (validateStep(currentStep)) {
+        if (currentStep < totalSteps) {
+          currentStep++;
+          updateStepUI(currentStep);
+        }
+      }
+    });
+  });
+
+  form.querySelectorAll('.btn-prev-step').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (currentStep > 1) {
+        currentStep--;
+        updateStepUI(currentStep);
+      }
+    });
+  });
+
+  stepIndicators.forEach((indicator, index) => {
+    indicator.addEventListener('click', () => {
+      const targetStep = index + 1;
+      if (targetStep < currentStep) {
+        currentStep = targetStep;
+        updateStepUI(currentStep);
+      } else if (targetStep === currentStep + 1 && validateStep(currentStep)) {
+        currentStep = targetStep;
+        updateStepUI(currentStep);
+      }
+    });
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!validateStep(currentStep)) return;
+
+    const formData = {
+      fullName: form.querySelector('#formFullName')?.value || '',
+      country: form.querySelector('#formCountry')?.value || '',
+      whatsapp: form.querySelector('#formWhatsapp')?.value || '',
+      email: form.querySelector('#formEmail')?.value || '',
+      currentLevel: form.querySelector('#formCurrentLevel')?.value || '',
+      bacSeries: form.querySelector('#formBacSeries')?.value || '',
+      studyDomain: form.querySelector('#formStudyDomain')?.selectedOptions?.[0]?.text || form.querySelector('#formStudyDomain')?.value || '',
+      targetCity: form.querySelector('#formTargetCity')?.value || '',
+      targetUniversity: form.querySelector('#formTargetUniversity')?.value || 'Recommandation Wicka',
+      selectedPack: form.querySelector('input[name="formPackChoice"]:checked')?.value || 'Pack Admission Réussie',
+      airportTransfer: form.querySelector('input[name="formAirportTransfer"]:checked')?.value || 'Oui, navette avec chauffeur privé demandée',
+      notes: form.querySelector('#formNotes')?.value || ''
+    };
+
+    // Sauvegarde temporaire (sans passer d'infos perso dans l'URL) puis redirection
+    try {
+      sessionStorage.setItem('wickaApplication', JSON.stringify(formData));
+    } catch (e) { /* sessionStorage indisponible : on affiche la modale de secours */ }
+
+    if (typeof Storage !== 'undefined') {
+      window.location.href = 'merci.html';
+    } else {
+      showSubmissionSuccessModal(formData);
+    }
+  });
+}
+
+function showSubmissionSuccessModal(data) {
+  const modal = document.getElementById('successModal');
+  const detailsBox = document.getElementById('modalStudentSummary');
+  const whatsappBtn = document.getElementById('modalWhatsappRedirect');
+
+  if (detailsBox) {
+    detailsBox.innerHTML = `
+      <div class="summary-row"><strong>Nom complet :</strong> <span>${data.fullName}</span></div>
+      <div class="summary-row"><strong>Pays de résidence :</strong> <span>${data.country}</span></div>
+      <div class="summary-row"><strong>Numéro WhatsApp :</strong> <span>${data.whatsapp}</span></div>
+      <div class="summary-row"><strong>Filière visée :</strong> <span>${data.studyDomain}</span></div>
+      <div class="summary-row"><strong>Université :</strong> <span>${data.targetUniversity}</span></div>
+      <div class="summary-row"><strong>Pack choisi :</strong> <span class="badge-rose-soft">${data.selectedPack}</span></div>
+      <div class="summary-row"><strong>Navette aéroport :</strong> <span>${data.airportTransfer}</span></div>
+    `;
+  }
+
+  if (whatsappBtn) {
+    const waText = encodeURIComponent(
+      `Bonjour Wicka Assistance ! 👋\nJe viens de soumettre ma candidature pour étudier au Maroc.\n\n` +
+      `👤 Nom : ${data.fullName}\n` +
+      `🌍 Pays : ${data.country}\n` +
+      `🎓 Niveau : ${data.currentLevel} (${data.bacSeries})\n` +
+      `📚 Filière : ${data.studyDomain}\n` +
+      `🏫 Établissement : ${data.targetUniversity}\n` +
+      `📦 Formule : ${data.selectedPack}\n` +
+      `🚗 Navette Aéroport : ${data.airportTransfer}\n\n` +
+      `Merci de m'indiquer la suite des démarches !`
+    );
+    whatsappBtn.href = `https://wa.me/212771674815?text=${waText}`;
+  }
+
+  if (modal) {
+    modal.classList.add('active');
+    document.body.classList.add('no-scroll');
+  }
+}
+
+/* ============================================================
+   7. FAQ ACCORDÉON
+   ============================================================ */
+function initFaqAccordion() {
+  const container = document.getElementById('faqAccordionContainer');
+  const searchInput = document.getElementById('faqSearchInput');
+
+  if (!container || !window.WICKA_DATA) return;
+
+  const renderFaqs = (filter = '') => {
+    const filteredFaqs = window.WICKA_DATA.faqs.filter(faq => {
+      return faq.q.toLowerCase().includes(filter.toLowerCase()) || 
+             faq.a.toLowerCase().includes(filter.toLowerCase());
+    });
+
+    if (filteredFaqs.length === 0) {
+      container.innerHTML = `
+        <div class="faq-empty">
+          <p>Aucune réponse trouvée pour "${filter}". Nos conseillers sont à votre disposition par WhatsApp au +212 7 71 67 48 15 !</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = filteredFaqs.map((faq, index) => {
+      const isOpen = index === 0;
+      return `
+        <div class="faq-item ${isOpen ? 'active' : ''}">
+          <button class="faq-question-btn" type="button">
+            <span class="faq-q-text">${faq.q}</span>
+            <span class="faq-icon"><i class="fas fa-chevron-down"></i></span>
+          </button>
+          <div class="faq-answer-panel" style="${isOpen ? 'max-height: 400px;' : ''}">
+            <p>${faq.a}</p>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    const items = container.querySelectorAll('.faq-item');
+    items.forEach(item => {
+      const btn = item.querySelector('.faq-question-btn');
+      const panel = item.querySelector('.faq-answer-panel');
+
+      btn.addEventListener('click', () => {
+        const isActive = item.classList.contains('active');
+        items.forEach(other => {
+          other.classList.remove('active');
+          const otherPanel = other.querySelector('.faq-answer-panel');
+          if (otherPanel) otherPanel.style.maxHeight = null;
+        });
+
+        if (!isActive) {
+          item.classList.add('active');
+          panel.style.maxHeight = panel.scrollHeight + 'px';
+        }
+      });
+    });
+  };
+
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      renderFaqs(e.target.value.trim());
+    });
+  }
+
+  renderFaqs();
+}
+
+/* ============================================================
+   8. TÉMOIGNAGES & AVIS CLIENTS
+   ============================================================ */
+function initTestimonials() {
+  const container = document.getElementById('testimonialsGrid');
+  if (!container || !window.WICKA_DATA) return;
+
+  container.innerHTML = window.WICKA_DATA.testimonials.map(t => {
+    const stars = Array(t.rating).fill('<i class="fas fa-star text-gold"></i>').join('');
+    return `
+      <div class="testimonial-card">
+        <div class="tem-header">
+          <div class="tem-avatar-wrap">
+            <img src="${t.avatar}" alt="${t.name}" class="tem-avatar" loading="lazy" />
+            <span class="tem-verified-check" title="Étudiant vérifié Wicka"><i class="fas fa-check"></i></span>
+          </div>
+          <div class="tem-info">
+            <h4 class="tem-name">${t.name}</h4>
+            <span class="tem-origin">${t.origin}</span>
+            <div class="tem-stars">${stars}</div>
+          </div>
+        </div>
+        <div class="tem-badge-pack">${t.badge}</div>
+        <div class="tem-academic-box">
+          <p class="tem-uni"><i class="fas fa-university"></i> ${t.university}</p>
+          <p class="tem-prog"><i class="fas fa-graduation-cap"></i> ${t.program}</p>
+        </div>
+        <blockquote class="tem-quote">
+          "${t.quote}"
+        </blockquote>
+        <div class="tem-footer">
+          <span class="tem-year">${t.year}</span>
+          <span class="tem-status"><i class="fas fa-shield-alt"></i> Témoignage authentique certifié</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ============================================================
+   9. NOTIFICATIONS DE PREUVE SOCIALE
+   ============================================================ */
+function initSocialProofToasts() {
+  const toastContainer = document.createElement('div');
+  toastContainer.className = 'social-proof-container';
+  document.body.appendChild(toastContainer);
+
+  const notifications = [
+    { name: "Moussa D.", city: "Dakar 🇸🇳", action: "a validé son admission à l'UEMF Euromed Fès", time: "Il y a 2 min" },
+    { name: "Sylvie K.", city: "Abidjan 🇨🇮", action: "a réservé le Pack VIP avec navette aéroport", time: "Il y a 6 min" },
+    { name: "Patrick M.", city: "Douala 🇨🇲", action: "a obtenu sa lettre d'admission à l'ESTEM Casablanca", time: "Il y a 11 min" },
+    { name: "Aimé N.", city: "Libreville 🇬🇦", action: "vient de finaliser son inscription en Médecine UIASS", time: "Il y a 18 min" },
+    { name: "Fatou B.", city: "Conakry 🇬🇳", action: "a reçu son diagnostic d'orientation par WhatsApp", time: "Il y a 25 min" }
+  ];
+
+  let index = 0;
+
+  const showNextToast = () => {
+    const item = notifications[index % notifications.length];
+    index++;
+
+    const toast = document.createElement('div');
+    toast.className = 'social-proof-toast';
+    toast.innerHTML = `
+      <div class="toast-icon"><i class="fas fa-graduation-cap"></i></div>
+      <div class="toast-content">
+        <p class="toast-title"><strong>${item.name}</strong> (${item.city})</p>
+        <p class="toast-desc">${item.action}</p>
+        <span class="toast-time">${item.time}</span>
+      </div>
+      <button class="toast-close-btn" onclick="this.parentElement.remove()">&times;</button>
+    `;
+
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add('visible');
+    }, 100);
+
+    setTimeout(() => {
+      toast.classList.remove('visible');
+      setTimeout(() => toast.remove(), 400);
+    }, 6000);
+  };
+
+  setTimeout(() => {
+    showNextToast();
+    setInterval(showNextToast, 28000);
+  }, 4000);
+}
+
+window.showToastNotification = function(msg, type = 'info') {
+  let toast = document.getElementById('globalFeedbackToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'globalFeedbackToast';
+    toast.className = 'global-feedback-toast';
+    document.body.appendChild(toast);
+  }
+
+  toast.innerHTML = `<span>${msg}</span>`;
+  toast.className = `global-feedback-toast active type-${type}`;
+
+  setTimeout(() => {
+    toast.classList.remove('active');
+  }, 4000);
+};
+
+/* ============================================================
+   10. MODALS
+   ============================================================ */
+function initModals() {
+  const closeButtons = document.querySelectorAll('.modal-close-btn, .modal-backdrop');
+
+  closeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.modal-wrapper').forEach(m => m.classList.remove('active'));
+      document.body.classList.remove('no-scroll');
+    });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-wrapper').forEach(m => m.classList.remove('active'));
+      document.body.classList.remove('no-scroll');
+    }
+  });
+
+  const callbackTrigger = document.getElementById('triggerCallbackModal');
+  const callbackModal = document.getElementById('callbackModal');
+  if (callbackTrigger && callbackModal) {
+    callbackTrigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      callbackModal.classList.add('active');
+      document.body.classList.add('no-scroll');
+    });
+  }
+
+  const callbackForm = document.getElementById('callbackQuickForm');
+  if (callbackForm) {
+    callbackForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const phone = callbackForm.querySelector('input[type="tel"]').value;
+      if (callbackModal) callbackModal.classList.remove('active');
+      document.body.classList.remove('no-scroll');
+      showToastNotification(`📞 Demande d'appel enregistrée pour le ${phone} ! Un conseiller Wicka vous appelle sous 30 min.`);
+    });
+  }
+}
