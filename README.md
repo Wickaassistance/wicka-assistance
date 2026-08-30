@@ -25,7 +25,10 @@ Site **100 % statique** (HTML / CSS / JavaScript), sans dépendance serveur → 
 
 ```
 wicka-assistance/
-├── index.html            # Page unique (toutes les sections)
+├── index.html            # Accueil (hero, espace parents, parcours, à propos, avis, FAQ)
+├── universites.html      # Universités privées (explorateur + réussites)
+├── tarifs.html           # Tarifs par pays, simulateur de budget & packs
+├── candidature.html      # Formulaire de candidature multi-étapes
 ├── merci.html            # Page de remerciement après envoi du formulaire
 ├── css/
 │   ├── style.css         # Styles principaux (charte rubis)

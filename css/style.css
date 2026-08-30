@@ -70,7 +70,9 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 92px; /* compense le header fixe pour les ancres */
   font-size: 16px;
+  overflow-x: hidden; /* empêche tout défilement horizontal / espace vide à droite */
 }
 
 body {
@@ -405,7 +407,7 @@ button {
 .mobile-menu-drawer {
   position: fixed;
   top: 0;
-  right: -100%;
+  right: 0;
   width: 85%;
   max-width: 380px;
   height: 100vh;
@@ -415,12 +417,13 @@ button {
   padding: 30px 24px;
   display: flex;
   flex-direction: column;
-  transition: right 0.4s ease;
+  transform: translateX(105%); /* caché hors écran sans créer de défilement horizontal */
+  transition: transform 0.4s ease;
   overflow-y: auto;
 }
 
 .mobile-menu-drawer.active {
-  right: 0;
+  transform: translateX(0);
 }
 
 .drawer-header {
@@ -3054,6 +3057,74 @@ button {
 }
 
 .apply-reassure-chips i { color: var(--rose-600); }
+
+/* --- Section "Explorez" (navigation multi-pages) --- */
+.explore-section {
+  padding: 80px 0;
+  background: var(--white);
+}
+
+.explore-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.explore-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 32px 28px;
+  border: 1px solid var(--rose-100);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  color: inherit;
+}
+
+.explore-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--rose-300);
+}
+
+.explore-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: var(--radius-md);
+  background: var(--rose-soft);
+  color: var(--rose-800);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.55rem;
+}
+
+.explore-card h3 { font-size: 1.28rem; }
+
+.explore-card p {
+  color: var(--slate-600);
+  font-size: 0.92rem;
+  flex: 1;
+}
+
+.explore-link {
+  font-weight: 700;
+  color: var(--rose-700);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.explore-card:hover .explore-link { gap: 12px; }
+
+.explore-card-accent {
+  background: linear-gradient(180deg, #ffffff 0%, var(--rose-soft) 100%);
+  border-color: var(--rose-300);
+}
 
 /* --- Section réussites (photos étudiants) --- */
 .success-band {

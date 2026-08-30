@@ -81,23 +81,12 @@ function initNavigation() {
     });
   }
 
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-      const targetId = this.getAttribute('href');
-      if (targetId === '#' || targetId === '') return;
-      const targetElement = document.querySelector(targetId);
-      if (targetElement) {
-        e.preventDefault();
-        const headerOffset = 80;
-        const elementPosition = targetElement.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
-      }
-    });
+  // Navigation par ancres : on s'appuie sur le défilement NATIF du navigateur
+  // (html { scroll-behavior: smooth; scroll-padding-top } gère l'offset du header fixe).
+  // C'est bien plus fiable que le scroll JS manuel, surtout pendant le chargement des images.
+  // On neutralise seulement les liens vides "#" (icônes sociales placeholder).
+  document.querySelectorAll('a[href="#"]').forEach(anchor => {
+    anchor.addEventListener('click', (e) => e.preventDefault());
   });
 }
 
@@ -345,12 +334,21 @@ function initUniversityFilters() {
 
 window.selectUniversityForApply = function(uniName, domain) {
   const formSection = document.getElementById('candidature');
-  if (formSection) {
-    const headerOffset = 80;
-    const elementPosition = formSection.getBoundingClientRect().top;
-    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-    window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+
+  // Site multi-pages : si le formulaire n'est pas sur cette page, on mémorise
+  // le choix et on redirige vers la page Candidature (préremplissage au chargement).
+  if (!formSection) {
+    try {
+      sessionStorage.setItem('wickaPreselect', JSON.stringify({ uni: uniName, domain: domain }));
+    } catch (e) { /* stockage indisponible */ }
+    window.location.href = 'candidature.html';
+    return;
   }
+
+  const headerOffset = 92;
+  const elementPosition = formSection.getBoundingClientRect().top;
+  const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+  window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
 
   const uniInput = document.getElementById('formTargetUniversity');
   if (uniInput) {
@@ -459,6 +457,18 @@ function initBudgetSimulator() {
 function initMultiStepForm() {
   const form = document.getElementById('multiStepApplicationForm');
   if (!form) return;
+
+  // Préremplissage si l'utilisateur a choisi une université sur la page Universités
+  try {
+    const pre = JSON.parse(sessionStorage.getItem('wickaPreselect') || 'null');
+    if (pre) {
+      const u = form.querySelector('#formTargetUniversity');
+      if (u && pre.uni) u.value = pre.uni;
+      const d = form.querySelector('#formStudyDomain');
+      if (d && pre.domain && pre.domain !== 'all') d.value = pre.domain;
+      sessionStorage.removeItem('wickaPreselect');
+    }
+  } catch (e) { /* stockage indisponible */ }
 
   const steps = form.querySelectorAll('.form-step-panel');
   const stepIndicators = document.querySelectorAll('.step-indicator-item');

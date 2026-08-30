@@ -163,6 +163,17 @@
     height: 320px;
   }
 
+  /* Ligne de confiance "+520 étudiants" : empilée et centrée */
+  .hero-trust-row {
+    flex-direction: column;
+    gap: 14px;
+    text-align: center;
+  }
+
+  .trust-avatars-group {
+    justify-content: center;
+  }
+
   .hero-floating-card-1, .hero-floating-card-2 {
     display: none;
   }
@@ -194,6 +205,11 @@
   .cta-photo-stats { gap: 16px 26px; }
 
   .cta-photo-stats strong { font-size: 1.6rem; }
+
+  /* Cartes "Explorez" empilées */
+  .explore-cards {
+    grid-template-columns: 1fr;
+  }
 
   /* Section réussites empilée */
   .success-photos {
