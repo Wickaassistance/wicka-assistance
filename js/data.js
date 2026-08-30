@@ -6,9 +6,9 @@
 const WICKA_DATA = {
   // Coordonnées officielles
   contact: {
-    phone: "+212 7 71 67 48 15",
-    phoneRaw: "212771674815",
-    whatsappLink: "https://wa.me/212771674815",
+    phone: "+212 7 89 09 54 98",
+    phoneRaw: "212789095498",
+    whatsappLink: "https://wa.me/212789095498",
     email: "contact@wicka-assistance.com",
     addressCasa: "Boulevard d'Anfa, Maarif, Casablanca - Maroc",
     addressRabat: "Avenue de France, Agdal, Rabat - Maroc"
@@ -630,7 +630,7 @@ const WICKA_DATA = {
     },
     {
       q: "Comment contacter directement vos conseillers au Maroc ?",
-      a: "Vous pouvez joindre notre équipe 7j/7 directement sur WhatsApp au +212 7 71 67 48 15 ou par email à contact@wicka-assistance.com. Nous organisons également des rendez-vous téléphoniques ou des visios avec les parents pour répondre à toutes leurs questions."
+      a: "Vous pouvez joindre notre équipe 7j/7 directement sur WhatsApp au +212 7 89 09 54 98 ou par email à contact@wicka-assistance.com. Nous organisons également des rendez-vous téléphoniques ou des visios avec les parents pour répondre à toutes leurs questions."
     }
   ]
 };

@@ -75,7 +75,7 @@ En résumé : pousser le dossier sur un dépôt GitHub, puis **Settings → Page
 |---|---|---|
 | Les **prix** (promo & barrés) | `js/data.js` | objet `countryPricings` et tableau `packs` |
 | Les prix affichés dans les cartes | `index.html` | section `#packs` (`.pack-price` / `.pack-price-old`) |
-| Le **numéro WhatsApp** | rechercher `212771674815` | `index.html`, `js/data.js`, `js/main.js` |
+| Le **numéro WhatsApp** | rechercher `212789095498` | `index.html`, `js/data.js`, `js/main.js` |
 | La **date de fin de promo** | `index.html` | `id="promoCountdown"` → `data-deadline` |
 | Le **nombre de places** | `index.html` | `id="promoPlaces"` |
 | Les **universités** | `js/data.js` | tableau `universities` |

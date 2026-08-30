@@ -172,7 +172,7 @@ function initCountryPricingSwitcher() {
     document.querySelectorAll('.btn-order-pack').forEach(btn => {
       const packType = btn.getAttribute('data-pack');
       const waMsg = encodeURIComponent(`Bonjour Wicka Assistance ! Je réside en/au ${data.name} et je souhaite souscrire au ${packType} (${packType === 'Pack Admission' ? data.packAdmission : data.packVIP}).`);
-      btn.href = `https://wa.me/212771674815?text=${waMsg}`;
+      btn.href = `https://wa.me/212789095498?text=${waMsg}`;
     });
   };
 
@@ -624,7 +624,7 @@ function showSubmissionSuccessModal(data) {
       `🚗 Navette Aéroport : ${data.airportTransfer}\n\n` +
       `Merci de m'indiquer la suite des démarches !`
     );
-    whatsappBtn.href = `https://wa.me/212771674815?text=${waText}`;
+    whatsappBtn.href = `https://wa.me/212789095498?text=${waText}`;
   }
 
   if (modal) {
@@ -651,7 +651,7 @@ function initFaqAccordion() {
     if (filteredFaqs.length === 0) {
       container.innerHTML = `
         <div class="faq-empty">
-          <p>Aucune réponse trouvée pour "${filter}". Nos conseillers sont à votre disposition par WhatsApp au +212 7 71 67 48 15 !</p>
+          <p>Aucune réponse trouvée pour "${filter}". Nos conseillers sont à votre disposition par WhatsApp au +212 7 89 09 54 98 !</p>
         </div>
       `;
       return;
