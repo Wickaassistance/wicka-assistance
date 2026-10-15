@@ -1,0 +1,15 @@
+.git/
+.gitignore
+.dev.vars*
+.env*
+.wrangler/
+node_modules/
+api/
+server/
+worker/
+functions/
+vercel.json
+wrangler.jsonc
+.assetsignore
+README.md
+server.ps1
