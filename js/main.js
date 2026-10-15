@@ -568,30 +568,40 @@ function initMultiStepForm() {
     const activePanel = form.querySelector(`.form-step-panel[data-step="${step}"]`);
     if (!activePanel) return true;
 
-    const requiredInputs = activePanel.querySelectorAll('[required]');
+    const requiredInputs = [...activePanel.querySelectorAll('[required]')];
+    const radioNames = [...new Set(requiredInputs.filter(input => input.type === 'radio').map(input => input.name).filter(Boolean))];
     let isValid = true;
+    let firstInvalid = null;
 
     requiredInputs.forEach(input => {
       input.classList.remove('field-error');
-      if (!input.value.trim()) {
+      if (input.type === 'radio') return;
+      const value = String(input.value || '').trim();
+      let invalid = input.required && !value;
+      if (!invalid && input.type === 'email' && !isValidEmail(value)) invalid = true;
+      if (!invalid && input.type === 'tel' && !isValidPhone(value)) invalid = true;
+      if (!invalid && input.minLength > 0 && value.length < input.minLength) invalid = true;
+      if (invalid) {
         input.classList.add('field-error');
+        firstInvalid ||= input;
         isValid = false;
       }
+    });
 
-      if (input.type === 'email' && input.value.trim() && !isValidEmail(input.value)) {
-        input.classList.add('field-error');
-        isValid = false;
-      }
-      if (input.type === 'tel' && input.value.trim() && !isValidPhone(input.value)) {
-        input.classList.add('field-error');
+    radioNames.forEach(name => {
+      const group = [...activePanel.querySelectorAll(`input[type="radio"][name="${CSS.escape(name)}"]`)];
+      const groupIsValid = group.some(input => input.checked);
+      group.forEach(input => input.classList.toggle('field-error', !groupIsValid));
+      if (!groupIsValid) {
+        firstInvalid ||= group[0];
         isValid = false;
       }
     });
 
     if (!isValid) {
-      showToastNotification('⚠️ Veuillez remplir tous les champs obligatoires en rose.', 'warning');
+      showToastNotification('Veuillez compléter les champs obligatoires signalés.', 'warning');
+      firstInvalid?.focus({ preventScroll: false });
     }
-
     return isValid;
   };
 
