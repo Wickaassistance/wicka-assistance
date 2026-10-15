@@ -21,7 +21,7 @@ Avant le déploiement, ajouter les secrets et variables Worker dans **Settings �
 | `BREVO_API_KEY` | Secret | Authentification API Brevo |
 | `BREVO_FROM_EMAIL` | Variable | Adresse expéditrice vérifiée |
 | `BREVO_FROM_NAME` | Variable | Nom affiché par l’expéditeur |
-| `BREVO_COMPANY_EMAIL` | Variable | Adresse de réception de l’entreprise |
+| `BREVO_COMPANY_EMAIL` | Variable | Adresse de réception de l’entreprise (`wickaassistance@gmail.com`) |
 | `PUBLIC_SITE_URL` | Variable publique | Domaine canonique public, sans slash final |
 | `BREVO_LOGO_URL` | Variable publique | URL absolue du logo affiché dans les e-mails |
 
