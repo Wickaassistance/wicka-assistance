@@ -44,7 +44,14 @@ function emailLayout(title, content, cfg) {
 async function sendBrevo({ to, subject, html, replyTo }, cfg) {
   const payload = { sender: { name: cfg.fromName, email: cfg.fromEmail }, to: [{ email: to }], subject, htmlContent: html };
   if (replyTo && validEmail(replyTo)) payload.replyTo = { email: replyTo };
-  const response = await fetch(BREVO_ENDPOINT, { method: 'POST', headers: { accept: 'application/json', 'api-key': cfg.apiKey, 'content-type': 'application/json' }, body: JSON.stringify(payload) });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  let response;
+  try {
+    response = await fetch(BREVO_ENDPOINT, { method: 'POST', headers: { accept: 'application/json', 'api-key': cfg.apiKey, 'content-type': 'application/json' }, body: JSON.stringify(payload), signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
   if (!response.ok) {
     const detail = await response.text();
     console.error('[brevo] API error', response.status, detail.slice(0, 500));
@@ -99,10 +106,16 @@ function callbackEmail(body, cfg) {
 }
 export async function onRequestPost(context) {
   try {
+    const contentLength = Number(context.request.headers.get('content-length') || 0);
+    if (contentLength > 50_000) return Response.json({ error: 'Requête trop volumineuse.' }, { status: 413 });
     const body = await context.request.json().catch(() => ({}));
+    if (body.website) return Response.json({ ok: true });
     const env = context.env || {};
     const cfg = config(env);
     const type = text(body.type, 20);
+    if ((type === 'contact' || type === 'candidature') && body.consent !== 'accepted') {
+      return Response.json({ error: 'Le consentement est obligatoire.' }, { status: 400 });
+    }
     if (type === 'callback') {
       await sendBrevo(callbackEmail(body, cfg), cfg);
       return Response.json({ ok: true });
@@ -114,7 +127,9 @@ export async function onRequestPost(context) {
     return Response.json({ ok: true });
   } catch (error) {
     console.error('[send-email]', error.message);
-    const status = /Configuration|invalide|obligatoire|incomplets|inconnu/.test(error.message) ? 400 : 502;
-    return Response.json({ error: error.message || 'Erreur d’envoi.' }, { status });
+    const isClientError = /Adresse|Numéro|obligatoire|incomplets|inconnu|trop volumineuse/.test(error.message);
+    const status = isClientError ? 400 : 502;
+    const message = isClientError ? error.message : 'Le service est temporairement indisponible.';
+    return Response.json({ error: message }, { status });
   }
 }

@@ -44,7 +44,14 @@ function emailLayout(title, content, cfg) {
 async function sendBrevo({ to, subject, html, replyTo }, cfg) {
   const payload = { sender: { name: cfg.fromName, email: cfg.fromEmail }, to: [{ email: to }], subject, htmlContent: html };
   if (replyTo && validEmail(replyTo)) payload.replyTo = { email: replyTo };
-  const response = await fetch(BREVO_ENDPOINT, { method: 'POST', headers: { accept: 'application/json', 'api-key': cfg.apiKey, 'content-type': 'application/json' }, body: JSON.stringify(payload) });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  let response;
+  try {
+    response = await fetch(BREVO_ENDPOINT, { method: 'POST', headers: { accept: 'application/json', 'api-key': cfg.apiKey, 'content-type': 'application/json' }, body: JSON.stringify(payload), signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
   if (!response.ok) {
     const detail = await response.text();
     console.error('[brevo] API error', response.status, detail.slice(0, 500));
@@ -103,6 +110,9 @@ export default async function handler(req, res) {
     const body = req.body && typeof req.body === 'object' ? req.body : {};
     const cfg = config();
     const type = text(body.type, 20);
+    if ((type === 'contact' || type === 'candidature') && body.consent !== 'accepted') {
+      return Response.json({ error: 'Le consentement est obligatoire.' }, { status: 400 });
+    }
     if (type === 'callback') { await sendBrevo(callbackEmail(body, cfg), cfg); return res.status(200).json({ ok: true }); }
     const emails = type === 'contact' ? contactEmails(body, cfg) : type === 'candidature' ? candidatureEmails(body, cfg) : null;
     if (!emails) return res.status(400).json({ error: 'Type de formulaire inconnu.' });

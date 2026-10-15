@@ -2,14 +2,44 @@ import { onRequestPost } from "../server/send-email.js";
 
 const PAGES = [
   ["/", "1.0"],
-  ["/candidature.html", "0.9"],
-  ["/universites.html", "0.8"],
-  ["/tarifs.html", "0.8"],
-  ["/contact.html", "0.6"],
-  ["/mentions-legales.html", "0.2"],
-  ["/politique-confidentialite.html", "0.2"],
-  ["/cgv.html", "0.2"]
+  ["/candidature", "0.9"],
+  ["/universites", "0.8"],
+  ["/tarifs", "0.8"],
+  ["/contact", "0.6"],
+  ["/mentions-legales", "0.2"],
+  ["/politique-confidentialite", "0.2"],
+  ["/cgv", "0.2"]
 ];
+
+const requestWindows = new Map();
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 8;
+
+function requestKey(request) {
+  return request.headers.get("CF-Connecting-IP") || request.headers.get("x-forwarded-for") || "unknown";
+}
+
+function allowRequest(request) {
+  const now = Date.now();
+  const key = requestKey(request);
+  const current = requestWindows.get(key);
+  if (!current || now - current.startedAt >= RATE_LIMIT_WINDOW_MS) {
+    requestWindows.set(key, { startedAt: now, count: 1 });
+    return true;
+  }
+  current.count += 1;
+  return current.count <= RATE_LIMIT_MAX;
+}
+
+function securityHeaders(response) {
+  const headers = new Headers(response.headers);
+  headers.set("x-content-type-options", "nosniff");
+  headers.set("referrer-policy", "strict-origin-when-cross-origin");
+  headers.set("permissions-policy", "camera=(), microphone=(), geolocation=()");
+  headers.set("x-frame-options", "SAMEORIGIN");
+  headers.set("content-security-policy", "default-src 'self'; base-uri 'self'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline'; connect-src 'self'; object-src 'none'; upgrade-insecure-requests");
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
 
 function siteOrigin(request, env) {
   return String(env.PUBLIC_SITE_URL || new URL(request.url).origin).trim().replace(/\/$/, "");
@@ -36,7 +66,8 @@ function llms(origin) {
 
 function rewriteHtml(response, origin, request) {
   const pageUrl = new URL(request.url);
-  const canonical = `${origin}${pageUrl.pathname === "/index.html" ? "/" : pageUrl.pathname}`;
+  const cleanPath = pageUrl.pathname.replace(/\.html$/, "") || "/";
+  const canonical = `${origin}${cleanPath === "/index" ? "/" : cleanPath}`;
   const image = `${origin}/assets/images/og-share.jpg`;
   return new HTMLRewriter()
     .on('link[rel="canonical"]', { element: (el) => el.setAttribute("href", canonical) })
@@ -44,7 +75,9 @@ function rewriteHtml(response, origin, request) {
     .on('meta[property="og:image"]', { element: (el) => el.setAttribute("content", image) })
     .on('meta[property="og:image:secure_url"]', { element: (el) => el.setAttribute("content", image) })
     .on('meta[name="twitter:image"]', { element: (el) => el.setAttribute("content", image) })
-    .on('script[type="application/ld+json"]', { text: (text) => text.replace(text.text.replaceAll("__PUBLIC_SITE_URL__", origin), true) })
+    .on('script[type="application/ld+json"]', { text: (chunk) => {
+      chunk.text = chunk.text.replaceAll("__PUBLIC_SITE_URL__", origin);
+    } })
     .transform(response);
 }
 
@@ -54,16 +87,19 @@ export default {
     const origin = siteOrigin(request, env);
 
     if (url.pathname === "/api/send-email") {
-      if (request.method !== "POST") return Response.json({ error: "Méthode non autorisée." }, { status: 405 });
-      return onRequestPost({ request, env });
+      if (request.method !== "POST") return securityHeaders(Response.json({ error: "Méthode non autorisée." }, { status: 405 }));
+      if (!allowRequest(request)) return securityHeaders(Response.json({ error: "Trop de demandes. Réessayez plus tard." }, { status: 429, headers: { "retry-after": "60" } }));
+      const originHeader = request.headers.get("Origin");
+      if (originHeader && originHeader !== origin) return securityHeaders(Response.json({ error: "Origine non autorisée." }, { status: 403 }));
+      return securityHeaders(await onRequestPost({ request, env }));
     }
-    if (url.pathname === "/sitemap.xml") return textResponse(sitemap(origin), "application/xml");
-    if (url.pathname === "/robots.txt") return textResponse(`User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /merci.html\n\nSitemap: ${origin}/sitemap.xml\n`, "text/plain");
-    if (url.pathname === "/llms.txt") return textResponse(llms(origin), "text/plain");
+    if (url.pathname === "/sitemap.xml") return securityHeaders(textResponse(sitemap(origin), "application/xml"));
+    if (url.pathname === "/robots.txt") return securityHeaders(textResponse(`User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /merci\n\nSitemap: ${origin}/sitemap.xml\n`, "text/plain"));
+    if (url.pathname === "/llms.txt") return securityHeaders(textResponse(llms(origin), "text/plain"));
 
     const response = await env.ASSETS.fetch(request);
     const contentType = response.headers.get("content-type") || "";
-    if (contentType.includes("text/html")) return rewriteHtml(response, origin, request);
-    return response;
+    if (contentType.includes("text/html")) return securityHeaders(rewriteHtml(response, origin, request));
+    return securityHeaders(response);
   }
 };

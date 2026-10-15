@@ -457,6 +457,10 @@ function isValidEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(value || '').trim());
 }
 
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
+}
+
 function isValidPhone(value) {
   const raw = String(value || '').trim();
   const digits = raw.replace(/\D/g, '');
@@ -578,7 +582,7 @@ function initMultiStepForm() {
       input.classList.remove('field-error');
       if (input.type === 'radio') return;
       const value = String(input.value || '').trim();
-      let invalid = input.required && !value;
+      let invalid = input.required && (input.type === 'checkbox' ? !input.checked : !value);
       if (!invalid && input.type === 'email' && !isValidEmail(value)) invalid = true;
       if (!invalid && input.type === 'tel' && !isValidPhone(value)) invalid = true;
       if (!invalid && input.minLength > 0 && value.length < input.minLength) invalid = true;
@@ -657,7 +661,8 @@ function initMultiStepForm() {
       targetUniversity: form.querySelector('#formTargetUniversity')?.value || 'Recommandation Wicka',
       selectedPack: form.querySelector('input[name="formPackChoice"]:checked')?.value || 'Pack Admission Réussie',
       airportTransfer: form.querySelector('input[name="formAirportTransfer"]:checked')?.value || 'Oui, navette avec chauffeur privé demandée',
-      notes: form.querySelector('#formNotes')?.value.trim() || ''
+      notes: form.querySelector('#formNotes')?.value.trim() || '',
+      consent: form.querySelector('#applicationConsent')?.checked ? 'accepted' : ''
     };
     const submitButton = form.querySelector('button[type="submit"]');
     if (submitButton) { submitButton.disabled = true; submitButton.classList.add('is-loading'); }
@@ -735,7 +740,7 @@ function initFaqAccordion() {
     if (filteredFaqs.length === 0) {
       container.innerHTML = `
         <div class="faq-empty">
-          <p>Aucune réponse trouvée pour "${filter}". Nos conseillers sont à votre disposition par WhatsApp au +212 7 89 09 54 98 !</p>
+          <p>Aucune réponse trouvée pour "${escapeHtml(filter)}". Nos conseillers sont à votre disposition par WhatsApp au +212 7 89 09 54 98 !</p>
         </div>
       `;
       return;
