@@ -46,7 +46,7 @@
         <p>Le site Wicka Assistance est édité par Wicka Assistance, service d’accompagnement et d’orientation pour les étudiants internationaux souhaitant étudier au Maroc.</p>
         <p>Contact : <a href="mailto:contact@wicka-assistance.com">contact@wicka-assistance.com</a> — WhatsApp : <a href="https://wa.me/212789095498">+212 7 89 09 54 98</a>.</p>
         <h2>Hébergement</h2>
-        <p>Le site est actuellement hébergé via une infrastructure de pages statiques. Les modalités d’hébergement peuvent évoluer sans modifier les présentes informations essentielles.</p>
+        <p>Le site est déployé sur l’infrastructure Cloudflare Workers, avec mise en cache et distribution mondiale des ressources statiques. L’hébergement peut évoluer sans modifier les présentes informations essentielles. La version et le domaine effectivement utilisés sont ceux indiqués dans la barre d’adresse du navigateur.</p>
         <h2>Responsabilité</h2>
         <p>Les informations publiées sont fournies à titre informatif. Wicka Assistance accompagne les démarches, mais ne garantit pas l’admission, l’obtention d’un visa, d’une bourse ou d’un document administratif.</p>
         <p>Lorsque l’établissement demande un examen ou un concours d’entrée, la décision dépend de l’établissement et du résultat obtenu par l’étudiant.</p>
@@ -57,5 +57,19 @@
       <p class="legal-back"><a href="index.html"><i class="fas fa-arrow-left"></i> Retour à l’accueil</a></p>
     </div>
   </main>
+
+  <aside class="cookie-banner" data-cookie-banner role="dialog" aria-labelledby="cookie-title" aria-describedby="cookie-description" hidden>
+    <div class="cookie-banner-content">
+      <p class="cookie-banner-title" id="cookie-title">Votre confidentialité compte</p>
+      <p id="cookie-description">Nous utilisons uniquement le stockage local nécessaire pour mémoriser votre choix. Aucun cookie publicitaire ou outil de suivi n’est installé.</p>
+      <a href="politique-confidentialite.html#cookies">En savoir plus</a>
+    </div>
+    <div class="cookie-banner-actions">
+      <button type="button" class="btn-secondary cookie-choice" data-cookie-choice="reject">Refuser</button>
+      <button type="button" class="btn-primary cookie-choice" data-cookie-choice="accept">Accepter</button>
+    </div>
+  </aside>
+
+  <script src="js/main.js"></script>
 </body>
 </html>

@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSocialProofToasts();
   initModals();
   initPromoCountdown();
+  initCookieBanner();
 });
 
 /* ============================================================
@@ -954,4 +955,27 @@ function initModals() {
       }
     });
   }
+}
+
+
+/* ============================================================
+   CONSENTEMENT COOKIES / STOCKAGE LOCAL
+   ============================================================ */
+function initCookieBanner() {
+  const banner = document.querySelector('[data-cookie-banner]');
+  if (!banner) return;
+  const storageKey = 'wicka_cookie_consent';
+  let choice = null;
+  try { choice = window.localStorage.getItem(storageKey); } catch (_) {}
+  if (choice === 'accepted' || choice === 'rejected') {
+    banner.hidden = true;
+    return;
+  }
+  banner.hidden = false;
+  banner.querySelectorAll('[data-cookie-choice]').forEach((button) => {
+    button.addEventListener('click', () => {
+      try { window.localStorage.setItem(storageKey, button.dataset.cookieChoice === 'accept' ? 'accepted' : 'rejected'); } catch (_) {}
+      banner.hidden = true;
+    });
+  });
 }
