@@ -630,15 +630,15 @@ function initMultiStepForm() {
     });
   });
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!validateStep(currentStep)) return;
 
     const formData = {
-      fullName: form.querySelector('#formFullName')?.value || '',
+      fullName: form.querySelector('#formFullName')?.value.trim() || '',
       country: form.querySelector('#formCountry')?.value || '',
-      whatsapp: form.querySelector('#formWhatsapp')?.value || '',
-      email: form.querySelector('#formEmail')?.value || '',
+      whatsapp: form.querySelector('#formWhatsapp')?.value.trim() || '',
+      email: form.querySelector('#formEmail')?.value.trim() || '',
       currentLevel: form.querySelector('#formCurrentLevel')?.value || '',
       bacSeries: form.querySelector('#formBacSeries')?.value || '',
       studyDomain: form.querySelector('#formStudyDomain')?.selectedOptions?.[0]?.text || form.querySelector('#formStudyDomain')?.value || '',
@@ -646,18 +646,23 @@ function initMultiStepForm() {
       targetUniversity: form.querySelector('#formTargetUniversity')?.value || 'Recommandation Wicka',
       selectedPack: form.querySelector('input[name="formPackChoice"]:checked')?.value || 'Pack Admission Réussie',
       airportTransfer: form.querySelector('input[name="formAirportTransfer"]:checked')?.value || 'Oui, navette avec chauffeur privé demandée',
-      notes: form.querySelector('#formNotes')?.value || ''
+      notes: form.querySelector('#formNotes')?.value.trim() || ''
     };
-
-    // Sauvegarde temporaire (sans passer d'infos perso dans l'URL) puis redirection
+    const submitButton = form.querySelector('button[type="submit"]');
+    if (submitButton) { submitButton.disabled = true; submitButton.classList.add('is-loading'); }
+    showToastNotification('Envoi de votre candidature en cours…');
     try {
-      sessionStorage.setItem('wickaApplication', JSON.stringify(formData));
-    } catch (e) { /* sessionStorage indisponible : on affiche la modale de secours */ }
-
-    if (typeof Storage !== 'undefined') {
+      const response = await fetch('/api/send-email', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'candidature', ...formData })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Impossible d’envoyer la candidature.');
+      try { sessionStorage.setItem('wickaApplication', JSON.stringify(formData)); } catch (error) { /* stockage indisponible */ }
       window.location.href = 'merci.html';
-    } else {
-      showSubmissionSuccessModal(formData);
+    } catch (error) {
+      showToastNotification(error.message || 'Une erreur est survenue. Réessayez.', 'warning');
+      if (submitButton) { submitButton.disabled = false; submitButton.classList.remove('is-loading'); }
     }
   });
 }
