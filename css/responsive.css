@@ -392,3 +392,8 @@ button,
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
+
+@media (max-width: 640px) {
+  .brand-image { width: 44px; height: 38px; }
+  .footer-brand .brand-image { width: 52px; height: 44px; }
+}
