@@ -23,6 +23,11 @@ function allowRequest(request) {
   const now = Date.now();
   const key = requestKey(request);
   const current = requestWindows.get(key);
+  if (requestWindows.size > 10_000) {
+    for (const [storedKey, storedValue] of requestWindows) {
+      if (now - storedValue.startedAt >= RATE_LIMIT_WINDOW_MS) requestWindows.delete(storedKey);
+    }
+  }
   if (!current || now - current.startedAt >= RATE_LIMIT_WINDOW_MS) {
     requestWindows.set(key, { startedAt: now, count: 1 });
     return true;

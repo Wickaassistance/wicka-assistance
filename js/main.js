@@ -257,31 +257,31 @@ function initUniversityFilters() {
     };
 
     container.innerHTML = list.map(uni => {
-      const tagsHtml = uni.tags.map(t => `<span class="uni-tag">${t}</span>`).join('');
+      const tagsHtml = uni.tags.map(t => `<span class="uni-tag">${escapeHtml(t)}</span>`).join('');
       const programsHtml = uni.popularPrograms.map(p => `<li><i class="fas fa-check-circle text-rose"></i> ${p}</li>`).join('');
       const photo = cityPhotos[uni.city] || 'assets/uni/campus1.jpg';
 
       return `
         <div class="university-card" data-domain="${uni.domain}" data-city="${uni.city}">
           <div class="uni-card-media">
-            <img src="${photo}" alt="${uni.cityName}" loading="lazy" />
-            <span class="uni-media-city"><i class="fas fa-map-marker-alt"></i> ${uni.cityName}</span>
-            <span class="uni-media-rate"><i class="fas fa-circle-check"></i> ${uni.admissionRate}</span>
+            <img src="${photo}" alt="${escapeHtml(uni.cityName)}" loading="lazy" />
+            <span class="uni-media-city"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(uni.cityName)}</span>
+            <span class="uni-media-rate"><i class="fas fa-circle-check"></i> ${escapeHtml(uni.admissionRate)}</span>
           </div>
           <div class="uni-card-header">
             <div class="uni-badge-top">
-              <span class="uni-city-badge"><i class="fas fa-map-marker-alt"></i> ${uni.cityName}</span>
-              <span class="uni-type-badge">${uni.type}</span>
+              <span class="uni-city-badge"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(uni.cityName)}</span>
+              <span class="uni-type-badge">${escapeHtml(uni.type)}</span>
             </div>
-            <h3 class="uni-name">${uni.name}</h3>
-            <p class="uni-domain-label"><i class="fas fa-graduation-cap"></i> ${uni.domainLabel}</p>
+            <h3 class="uni-name">${escapeHtml(uni.name)}</h3>
+            <p class="uni-domain-label"><i class="fas fa-graduation-cap"></i> ${escapeHtml(uni.domainLabel)}</p>
           </div>
 
           <div class="uni-card-body">
             <div class="uni-tags-wrap">
               ${tagsHtml}
             </div>
-            <p class="uni-desc">${uni.description}</p>
+            <p class="uni-desc">${escapeHtml(uni.description)}</p>
             
             <div class="uni-programs-box">
               <h4>Formations Phares :</h4>
@@ -291,17 +291,17 @@ function initUniversityFilters() {
             <div class="uni-meta-grid">
               <div class="meta-item">
                 <span class="meta-label">Frais indicatifs :</span>
-                <span class="meta-value">${uni.tuition}</span>
+                <span class="meta-value">${escapeHtml(uni.tuition)}</span>
               </div>
               <div class="meta-item">
                 <span class="meta-label">Taux d'admission :</span>
-                <span class="meta-value text-success">${uni.admissionRate}</span>
+                <span class="meta-value text-success">${escapeHtml(uni.admissionRate)}</span>
               </div>
             </div>
           </div>
 
           <div class="uni-card-footer">
-            <button class="btn-select-uni" onclick="selectUniversityForApply('${uni.shortName}', '${uni.domain}')">
+            <button class="btn-select-uni" data-uni-name="${escapeHtml(uni.shortName)}" data-uni-domain="${escapeHtml(uni.domain)}">
               <span>Choisir cette université</span>
               <i class="fas fa-arrow-right"></i>
             </button>
@@ -309,6 +309,9 @@ function initUniversityFilters() {
         </div>
       `;
     }).join('');
+    container.querySelectorAll('.btn-select-uni').forEach((button) => {
+      button.addEventListener('click', () => selectUniversityForApply(button.dataset.uniName || '', button.dataset.uniDomain || ''));
+    });
   };
 
   domainTabs.forEach(tab => {
@@ -754,11 +757,11 @@ function initFaqAccordion() {
       return `
         <div class="faq-item ${isOpen ? 'active' : ''}">
           <button class="faq-question-btn" type="button">
-            <span class="faq-q-text">${faq.q}</span>
+            <span class="faq-q-text">${escapeHtml(faq.q)}</span>
             <span class="faq-icon"><i class="fas fa-chevron-down"></i></span>
           </button>
           <div class="faq-answer-panel" style="${isOpen ? 'max-height: 400px;' : ''}">
-            <p>${faq.a}</p>
+            <p>${escapeHtml(faq.a)}</p>
           </div>
         </div>
       `;
@@ -807,25 +810,25 @@ function initTestimonials() {
       <div class="testimonial-card">
         <div class="tem-header">
           <div class="tem-avatar-wrap">
-            <img src="${t.avatar}" alt="${t.name}" class="tem-avatar" loading="lazy" />
+            <img src="${escapeHtml(t.avatar)}" alt="${escapeHtml(t.name)}" class="tem-avatar" loading="lazy" />
             <span class="tem-verified-check" title="Étudiant vérifié Wicka"><i class="fas fa-check"></i></span>
           </div>
           <div class="tem-info">
-            <h4 class="tem-name">${t.name}</h4>
-            <span class="tem-origin">${t.origin}</span>
+            <h4 class="tem-name">${escapeHtml(t.name)}</h4>
+            <span class="tem-origin">${escapeHtml(t.origin)}</span>
             <div class="tem-stars">${stars}</div>
           </div>
         </div>
-        <div class="tem-badge-pack">${t.badge}</div>
+        <div class="tem-badge-pack">${escapeHtml(t.badge)}</div>
         <div class="tem-academic-box">
-          <p class="tem-uni"><i class="fas fa-university"></i> ${t.university}</p>
-          <p class="tem-prog"><i class="fas fa-graduation-cap"></i> ${t.program}</p>
+          <p class="tem-uni"><i class="fas fa-university"></i> ${escapeHtml(t.university)}</p>
+          <p class="tem-prog"><i class="fas fa-graduation-cap"></i> ${escapeHtml(t.program)}</p>
         </div>
         <blockquote class="tem-quote">
-          "${t.quote}"
+          "${escapeHtml(t.quote)}"
         </blockquote>
         <div class="tem-footer">
-          <span class="tem-year">${t.year}</span>
+          <span class="tem-year">${escapeHtml(t.year)}</span>
           <span class="tem-status"><i class="fas fa-shield-alt"></i> Témoignage authentique certifié</span>
         </div>
       </div>
