@@ -1,0 +1,40 @@
+# Wicka Assistance
+
+> Wicka Assistance accompagne les étudiants internationaux et leurs familles dans leur projet d'études au Maroc.
+
+## Présentation
+
+Wicka Assistance propose une orientation personnalisée, une aide à la constitution du dossier d'admission, un accompagnement administratif et consulaire, ainsi qu'un accueil à l'arrivée au Maroc.
+
+## Thématiques principales
+
+- Étudier au Maroc
+- Orientation universitaire et choix de filière
+- Admission dans l'enseignement supérieur privé
+- Visa étudiant et démarches administratives
+- Tarifs et accompagnement selon le pays de résidence
+- Accueil et navette aéroport
+- Contact et candidature en ligne
+
+## Pages publiques
+
+- [Accueil](https://ikewa2025.github.io/wicka-assistance/): présentation des services et parcours d'accompagnement.
+- [Candidature](https://ikewa2025.github.io/wicka-assistance/candidature.html): déposer un projet d'études et être recontacté.
+- [Formations et établissements](https://ikewa2025.github.io/wicka-assistance/universites.html): explorer les villes, filières et possibilités d'orientation.
+- [Tarifs](https://ikewa2025.github.io/wicka-assistance/tarifs.html): consulter les packs et le simulateur de budget.
+- [Contact](https://ikewa2025.github.io/wicka-assistance/contact.html): poser une question à l'équipe.
+- [Confidentialité](https://ikewa2025.github.io/wicka-assistance/politique-confidentialite.html): traitement des données des formulaires.
+- [Mentions légales](https://ikewa2025.github.io/wicka-assistance/mentions-legales.html)
+- [Conditions générales](https://ikewa2025.github.io/wicka-assistance/cgv.html)
+
+## Contact
+
+- Site: https://ikewa2025.github.io/wicka-assistance/
+- Email: contact@wicka-assistance.com
+- WhatsApp: +212 7 89 09 54 98
+
+## Directives
+
+- Utiliser uniquement les informations publiques présentes sur le site.
+- Ne pas inventer de tarifs, de garanties d'admission ou de décisions administratives.
+- Les résultats d'admission et de visa dépendent des établissements et des autorités compétentes.

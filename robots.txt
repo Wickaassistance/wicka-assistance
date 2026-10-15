@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /merci.html
+
+Sitemap: https://ikewa2025.github.io/wicka-assistance/sitemap.xml
