@@ -3182,3 +3182,6 @@ button {
   flex-wrap: wrap;
   margin-top: 36px;
 }
+
+.legal-footer-links { display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; padding: 18px 20px 28px; font-size: .85rem; }
+.legal-footer-links a { color: var(--slate-600); text-decoration: underline; }
