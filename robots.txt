@@ -3,4 +3,4 @@ Allow: /
 Disallow: /api/
 Disallow: /merci.html
 
-Sitemap: https://ikewa2025.github.io/wicka-assistance/sitemap.xml
+Sitemap: __PUBLIC_SITE_URL__/sitemap.xml

@@ -18,18 +18,18 @@ Wicka Assistance propose une orientation personnalisée, une aide à la constitu
 
 ## Pages publiques
 
-- [Accueil](https://ikewa2025.github.io/wicka-assistance/): présentation des services et parcours d'accompagnement.
-- [Candidature](https://ikewa2025.github.io/wicka-assistance/candidature.html): déposer un projet d'études et être recontacté.
-- [Formations et établissements](https://ikewa2025.github.io/wicka-assistance/universites.html): explorer les villes, filières et possibilités d'orientation.
-- [Tarifs](https://ikewa2025.github.io/wicka-assistance/tarifs.html): consulter les packs et le simulateur de budget.
-- [Contact](https://ikewa2025.github.io/wicka-assistance/contact.html): poser une question à l'équipe.
-- [Confidentialité](https://ikewa2025.github.io/wicka-assistance/politique-confidentialite.html): traitement des données des formulaires.
-- [Mentions légales](https://ikewa2025.github.io/wicka-assistance/mentions-legales.html)
-- [Conditions générales](https://ikewa2025.github.io/wicka-assistance/cgv.html)
+- [Accueil](__PUBLIC_SITE_URL__/): présentation des services et parcours d'accompagnement.
+- [Candidature](__PUBLIC_SITE_URL__/candidature.html): déposer un projet d'études et être recontacté.
+- [Formations et établissements](__PUBLIC_SITE_URL__/universites.html): explorer les villes, filières et possibilités d'orientation.
+- [Tarifs](__PUBLIC_SITE_URL__/tarifs.html): consulter les packs et le simulateur de budget.
+- [Contact](__PUBLIC_SITE_URL__/contact.html): poser une question à l'équipe.
+- [Confidentialité](__PUBLIC_SITE_URL__/politique-confidentialite.html): traitement des données des formulaires.
+- [Mentions légales](__PUBLIC_SITE_URL__/mentions-legales.html)
+- [Conditions générales](__PUBLIC_SITE_URL__/cgv.html)
 
 ## Contact
 
-- Site: https://ikewa2025.github.io/wicka-assistance/
+- Site: __PUBLIC_SITE_URL__/
 - Email: contact@wicka-assistance.com
 - WhatsApp: +212 7 89 09 54 98
 
