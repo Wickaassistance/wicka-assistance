@@ -1,3 +1,280 @@
+/* ============================================================
+   WICKA ASSISTANCE - RESPONSIVE STYLESHEET
+   Mobile-First & Tablet Adaptations
+   ============================================================ */
+
+/* Écrans de taille moyenne (Laptops & Tablettes horizontales : max 1024px) */
+@media (max-width: 1024px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    text-align: center;
+  }
+
+  .hero-description {
+    margin: 0 auto 32px;
+  }
+
+  .hero-cta-group {
+    justify-content: center;
+  }
+
+  .hero-trust-row {
+    justify-content: center;
+  }
+
+  .hero-floating-card-1 {
+    left: 10px;
+    top: 10px;
+  }
+
+  .hero-floating-card-2 {
+    right: 10px;
+    bottom: 10px;
+  }
+
+  .hero-stats-bar {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+  }
+
+  .stat-item:nth-child(2)::after {
+    display: none;
+  }
+
+  .universities-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .steps-timeline-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .pricing-grid {
+    grid-template-columns: 1fr;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .pricing-card.featured {
+    transform: none;
+  }
+
+  .pricing-card.featured:hover {
+    transform: translateY(-4px);
+  }
+
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .simulator-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px;
+  }
+}
+
+/* Tablettes & Petits écrans (max 768px) */
+@media (max-width: 768px) {
+  .nav-links, .nav-callback-btn {
+    display: none;
+  }
+
+  .mobile-menu-toggle {
+    display: block;
+  }
+
+  .top-notice-bar {
+    display: none;
+  }
+
+  .hero-headline {
+    font-size: 2.3rem;
+  }
+
+  .section-title {
+    font-size: 2rem;
+  }
+
+  .universities-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .steps-timeline-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sim-radio-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row-2 {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .app-form-box {
+    padding: 24px 18px;
+  }
+
+  .step-indicator-label {
+    display: none;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .footer-bottom-bar {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .social-proof-container {
+    left: 12px;
+    bottom: 90px;
+  }
+
+  .social-proof-toast {
+    max-width: 290px;
+  }
+
+  .filter-top-row {
+    flex-direction: column;
+  }
+
+  .city-select-wrap {
+    width: 100%;
+  }
+
+  .hero-main-card img {
+    height: 320px;
+  }
+
+  /* Ligne de confiance "+520 étudiants" : empilée et centrée */
+  .hero-trust-row {
+    flex-direction: column;
+    gap: 14px;
+    text-align: center;
+  }
+
+  .trust-avatars-group {
+    justify-content: center;
+  }
+
+  .hero-floating-card-1, .hero-floating-card-2 {
+    display: none;
+  }
+
+  /* CTA bands empilés */
+  .cta-band-inner {
+    padding: 34px 26px;
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .cta-band-text h2 { font-size: 1.55rem; }
+
+  .cta-band-trust { justify-content: center; }
+
+  .cta-band-actions {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .cta-photo-band {
+    padding: 64px 0;
+    background-attachment: scroll;
+  }
+
+  .cta-photo-content h2 { font-size: 1.8rem; }
+
+  .cta-photo-stats { gap: 16px 26px; }
+
+  .cta-photo-stats strong { font-size: 1.6rem; }
+
+  /* Cartes "Explorez" empilées */
+  .explore-cards {
+    grid-template-columns: 1fr;
+  }
+
+  /* Section réussites empilée */
+  .success-photos {
+    grid-template-columns: 1fr;
+    max-width: 380px;
+    margin: 0 auto;
+  }
+
+  .success-photo { aspect-ratio: 4 / 3; }
+
+  /* Carte de réassurance empilée */
+  .apply-reassure {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .apply-reassure-photo {
+    flex: none;
+    width: 100%;
+    height: 220px;
+  }
+
+  .apply-reassure-chips { justify-content: center; }
+
+  .apply-reassure-text { text-align: center; }
+
+  /* Barre CTA fixe visible sur mobile */
+  .mobile-sticky-cta { display: flex; }
+
+  body { padding-bottom: 74px; }
+
+  .floating-whatsapp-btn { bottom: 88px; }
+
+  .social-proof-container { bottom: 150px; }
+}
+
+/* Petits Mobiles (max 480px) */
+@media (max-width: 480px) {
+  .hero-headline {
+    font-size: 1.95rem;
+  }
+
+  .hero-stats-bar {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+
+  .stat-item::after {
+    display: none !important;
+  }
+
+  .btn-primary, .btn-secondary {
+    width: 100%;
+  }
+
+  .hero-cta-group {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .about-values-list {
+    grid-template-columns: 1fr;
+  }
+}
+
 
 
 /* ============================================================
