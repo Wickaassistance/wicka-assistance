@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>__PUBLIC_SITE_URL__/</loc><priority>1.0</priority><changefreq>weekly</changefreq></url>
-  <url><loc>__PUBLIC_SITE_URL__/candidature.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-  <url><loc>__PUBLIC_SITE_URL__/universites.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>__PUBLIC_SITE_URL__/tarifs.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>__PUBLIC_SITE_URL__/contact.html</loc><priority>0.6</priority><changefreq>yearly</changefreq></url>
-  <url><loc>__PUBLIC_SITE_URL__/mentions-legales.html</loc><priority>0.2</priority><changefreq>yearly</changefreq></url>
-  <url><loc>__PUBLIC_SITE_URL__/politique-confidentialite.html</loc><priority>0.2</priority><changefreq>yearly</changefreq></url>
-  <url><loc>__PUBLIC_SITE_URL__/cgv.html</loc><priority>0.2</priority><changefreq>yearly</changefreq></url>
+  <url><loc>__PUBLIC_SITE_URL__//candidature</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>__PUBLIC_SITE_URL__//universites</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>__PUBLIC_SITE_URL__//tarifs</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>__PUBLIC_SITE_URL__//contact</loc><priority>0.6</priority><changefreq>yearly</changefreq></url>
+  <url><loc>__PUBLIC_SITE_URL__//mentions-legales</loc><priority>0.2</priority><changefreq>yearly</changefreq></url>
+  <url><loc>__PUBLIC_SITE_URL__//politique-confidentialite</loc><priority>0.2</priority><changefreq>yearly</changefreq></url>
+  <url><loc>__PUBLIC_SITE_URL__//cgv</loc><priority>0.2</priority><changefreq>yearly</changefreq></url>
 </urlset>

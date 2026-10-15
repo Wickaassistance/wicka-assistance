@@ -1,6 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /api/
-Disallow: /merci.html
+Disallow: //merci
 
 Sitemap: __PUBLIC_SITE_URL__/sitemap.xml

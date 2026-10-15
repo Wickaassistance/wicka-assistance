@@ -68,16 +68,19 @@ function initNavigation() {
   });
 
   if (mobileToggle && mobileMenu) {
+    mobileToggle.setAttribute('aria-expanded', 'false');
     mobileToggle.addEventListener('click', () => {
-      mobileMenu.classList.toggle('active');
-      mobileToggle.classList.toggle('active');
-      document.body.classList.toggle('no-scroll');
+      const isOpen = mobileMenu.classList.toggle('active');
+      mobileToggle.classList.toggle('active', isOpen);
+      mobileToggle.setAttribute('aria-expanded', String(isOpen));
+      document.body.classList.toggle('no-scroll', isOpen);
     });
 
     mobileLinks.forEach(link => {
       link.addEventListener('click', () => {
         mobileMenu.classList.remove('active');
         mobileToggle.classList.remove('active');
+        mobileToggle.setAttribute('aria-expanded', 'false');
         document.body.classList.remove('no-scroll');
       });
     });
@@ -343,7 +346,7 @@ window.selectUniversityForApply = function(uniName, domain) {
     try {
       sessionStorage.setItem('wickaPreselect', JSON.stringify({ uni: uniName, domain: domain }));
     } catch (e) { /* stockage indisponible */ }
-    window.location.href = 'candidature.html';
+    window.location.href = '/candidature';
     return;
   }
 

@@ -19,13 +19,13 @@ Wicka Assistance propose une orientation personnalisée, une aide à la constitu
 ## Pages publiques
 
 - [Accueil](__PUBLIC_SITE_URL__/): présentation des services et parcours d'accompagnement.
-- [Candidature](__PUBLIC_SITE_URL__/candidature.html): déposer un projet d'études et être recontacté.
-- [Formations et établissements](__PUBLIC_SITE_URL__/universites.html): explorer les villes, filières et possibilités d'orientation.
-- [Tarifs](__PUBLIC_SITE_URL__/tarifs.html): consulter les packs et le simulateur de budget.
-- [Contact](__PUBLIC_SITE_URL__/contact.html): poser une question à l'équipe.
-- [Confidentialité](__PUBLIC_SITE_URL__/politique-confidentialite.html): traitement des données des formulaires.
-- [Mentions légales](__PUBLIC_SITE_URL__/mentions-legales.html)
-- [Conditions générales](__PUBLIC_SITE_URL__/cgv.html)
+- [Candidature](__PUBLIC_SITE_URL__//candidature): déposer un projet d'études et être recontacté.
+- [Formations et établissements](__PUBLIC_SITE_URL__//universites): explorer les villes, filières et possibilités d'orientation.
+- [Tarifs](__PUBLIC_SITE_URL__//tarifs): consulter les packs et le simulateur de budget.
+- [Contact](__PUBLIC_SITE_URL__//contact): poser une question à l'équipe.
+- [Confidentialité](__PUBLIC_SITE_URL__//politique-confidentialite): traitement des données des formulaires.
+- [Mentions légales](__PUBLIC_SITE_URL__//mentions-legales)
+- [Conditions générales](__PUBLIC_SITE_URL__//cgv)
 
 ## Contact
 
