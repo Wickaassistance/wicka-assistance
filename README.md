@@ -2,7 +2,7 @@
 
 Site vitrine (landing page) pour **Wicka Assistance**, cabinet d'accompagnement des étudiants internationaux (Afrique de l'Ouest & Centrale, diaspora) vers les **meilleures universités privées du Maroc** : admissions, visa, carte consulaire, navette aéroport VIP et carte de séjour.
 
-Site **100 % statique** (HTML / CSS / JavaScript), sans dépendance serveur → hébergeable gratuitement sur **GitHub Pages**.
+Interface statique HTML/CSS/JavaScript, avec une fonction serverless minimale pour envoyer les formulaires via Brevo, sans base de données. L’interface seule peut être hébergée sur GitHub Pages ; les formulaires nécessitent un hébergeur serverless comme Vercel.
 
 ---
 
@@ -39,7 +39,10 @@ wicka-assistance/
 ├── assets/
 │   ├── images/           # Photos hero, équipe, avatars témoignages
 │   └── uni/              # Photos des villes (fiches universités & simulateur)
-├── server.ps1            # Serveur local de test (Windows PowerShell) — non requis en ligne
+├── api/send-email.js     # Fonction serverless Brevo, sans base de données
+├── .env.example          # Variables Brevo à configurer sur l’hébergeur
+├── vercel.json           # Configuration de la fonction serverless
+├── server.ps1            # Serveur local de test (Windows PowerShell) — interface uniquement
 └── README.md
 ```
 
@@ -89,3 +92,12 @@ Les photos des villes (`assets/uni/`) proviennent d'**[Unsplash](https://unsplas
 ---
 
 © 2026 Wicka Assistance. Tous droits réservés.
+
+
+## Configuration Brevo
+
+Les formulaires n’utilisent aucune base de données. La fonction `api/send-email.js` envoie deux e-mails via Brevo pour chaque formulaire : une notification à l’adresse de la société et une confirmation à l’utilisateur.
+
+Sur Vercel, configurer les variables présentes dans `.env.example` : `BREVO_API_KEY`, `BREVO_FROM_EMAIL`, `BREVO_FROM_NAME` et `BREVO_COMPANY_EMAIL`. L’adresse expéditrice doit être vérifiée dans Brevo. Ne jamais mettre la clé API dans HTML ou JavaScript côté navigateur.
+
+Le formulaire de contact et la candidature nécessitent donc un déploiement Vercel ou un autre hébergeur compatible avec les fonctions serverless. GitHub Pages peut servir les pages, mais ne peut pas exécuter `api/send-email.js`.
