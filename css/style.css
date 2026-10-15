@@ -3185,3 +3185,10 @@ button {
 
 .legal-footer-links { display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; padding: 18px 20px 28px; font-size: .85rem; }
 .legal-footer-links a { color: var(--slate-600); text-decoration: underline; }
+
+/* Formulaires Contact et validation */
+.field-message { display: block; min-height: 1.1em; color: var(--rose-700); font-size: .78rem; margin-top: 5px; }
+.form-status { min-height: 1.4em; margin-top: 14px; color: var(--slate-600); }
+.legal-consent { display: flex; gap: 9px; align-items: flex-start; margin: 18px 0; color: var(--slate-600); font-size: .85rem; line-height: 1.5; }
+.legal-consent a { color: var(--rose-700); text-decoration: underline; }
+.btn-primary:disabled { opacity: .65; cursor: wait; }

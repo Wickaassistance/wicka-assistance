@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initUniversityFilters();
   initBudgetSimulator();
   initMultiStepForm();
+  initContactForm();
   initFaqAccordion();
   initTestimonials();
   initSocialProofToasts();
@@ -451,6 +452,71 @@ function initBudgetSimulator() {
   calculateBudget();
 }
 
+function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(value || '').trim());
+}
+
+function isValidPhone(value) {
+  const raw = String(value || '').trim();
+  const digits = raw.replace(/\D/g, '');
+  return /^[+\d\s().-]+$/.test(raw) && digits.length >= 8 && digits.length <= 15;
+}
+
+function validateContactValue(input) {
+  const value = input.value.trim();
+  if (input.required && !value) return 'Ce champ est obligatoire.';
+  if (input.type === 'email' && value && !isValidEmail(value)) return 'Adresse e-mail invalide.';
+  if (input.type === 'tel' && value && !isValidPhone(value)) return 'Numéro de téléphone invalide.';
+  if (input.minLength > 0 && value.length < input.minLength) return `Minimum ${input.minLength} caractères.`;
+  return '';
+}
+
+function initContactForm() {
+  const form = document.getElementById('contactForm');
+  if (!form) return;
+  const status = document.getElementById('contactStatus');
+  const submit = document.getElementById('contactSubmit');
+  const fields = [...form.querySelectorAll('input:not([type="checkbox"]), textarea')];
+  const showFieldError = (input) => {
+    const error = validateContactValue(input);
+    input.classList.toggle('field-error', Boolean(error));
+    const message = form.querySelector(`[data-error-for="${input.id}"]`);
+    if (message) message.textContent = error;
+    return !error;
+  };
+  fields.forEach((input) => input.addEventListener('blur', () => showFieldError(input)));
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const valid = fields.every(showFieldError);
+    const consent = document.getElementById('contactConsent');
+    if (consent && !consent.checked) {
+      if (status) status.textContent = 'Veuillez accepter la politique de confidentialité.';
+      return;
+    }
+    if (!valid) {
+      if (status) status.textContent = 'Veuillez corriger les champs signalés.';
+      return;
+    }
+    if (submit) { submit.disabled = true; submit.classList.add('is-loading'); }
+    if (status) status.textContent = 'Envoi en cours…';
+    try {
+      const payload = Object.fromEntries(new FormData(form).entries());
+      const response = await fetch('/api/send-email', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'contact', ...payload })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Impossible d’envoyer le message.');
+      form.reset();
+      if (status) status.textContent = 'Votre message a bien été envoyé. Une réponse vous sera adressée sous 72 heures.';
+    } catch (error) {
+      if (status) status.textContent = error.message || 'Une erreur est survenue. Réessayez.';
+    } finally {
+      if (submit) { submit.disabled = false; submit.classList.remove('is-loading'); }
+    }
+  });
+}
+
 /* ============================================================
    6. FORMULAIRE DE CANDIDATURE MULTI-ÉTAPES
    ============================================================ */
@@ -512,12 +578,13 @@ function initMultiStepForm() {
         isValid = false;
       }
 
-      if (input.type === 'email' && input.value.trim()) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(input.value.trim())) {
-          input.classList.add('field-error');
-          isValid = false;
-        }
+      if (input.type === 'email' && input.value.trim() && !isValidEmail(input.value)) {
+        input.classList.add('field-error');
+        isValid = false;
+      }
+      if (input.type === 'tel' && input.value.trim() && !isValidPhone(input.value)) {
+        input.classList.add('field-error');
+        isValid = false;
       }
     });
 
