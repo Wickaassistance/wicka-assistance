@@ -508,7 +508,7 @@ function initContactForm() {
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Impossible d’envoyer le message.');
       form.reset();
-      if (status) status.textContent = 'Votre message a bien été envoyé. Une réponse vous sera adressée sous 72 heures.';
+      if (status) status.textContent = 'Votre message a bien été envoyé. Merci.';
     } catch (error) {
       if (status) status.textContent = error.message || 'Une erreur est survenue. Réessayez.';
     } finally {
@@ -659,7 +659,8 @@ function initMultiStepForm() {
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Impossible d’envoyer la candidature.');
       try { sessionStorage.setItem('wickaApplication', JSON.stringify(formData)); } catch (error) { /* stockage indisponible */ }
-      window.location.href = 'merci.html';
+      const whatsappMessage = `Bonjour Wicka Assistance ! Je viens de soumettre ma candidature.\n\nNom : ${formData.fullName}\nPays : ${formData.country}\nWhatsApp : ${formData.whatsapp}\nFilière : ${formData.studyDomain}\nUniversité : ${formData.targetUniversity}\nFormule : ${formData.selectedPack}\n\nMerci de m’indiquer la suite des démarches.`;
+      window.location.href = `https://wa.me/212789095498?text=${encodeURIComponent(whatsappMessage)}`;
     } catch (error) {
       showToastNotification(error.message || 'Une erreur est survenue. Réessayez.', 'warning');
       if (submitButton) { submitButton.disabled = false; submitButton.classList.remove('is-loading'); }
@@ -914,12 +915,33 @@ function initModals() {
 
   const callbackForm = document.getElementById('callbackQuickForm');
   if (callbackForm) {
-    callbackForm.addEventListener('submit', (e) => {
+    callbackForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const phone = callbackForm.querySelector('input[type="tel"]').value;
-      if (callbackModal) callbackModal.classList.remove('active');
-      document.body.classList.remove('no-scroll');
-      showToastNotification(`📞 Demande d'appel enregistrée pour le ${phone} ! Un conseiller Wicka vous appelle sous 30 min.`);
+      const phoneInput = callbackForm.querySelector('input[type="tel"]');
+      const phone = phoneInput?.value.trim() || '';
+      if (!isValidPhone(phone)) {
+        phoneInput?.classList.add('field-error');
+        showToastNotification('Veuillez saisir un numéro valide avec indicatif pays.', 'warning');
+        return;
+      }
+      const button = callbackForm.querySelector('button[type="submit"]');
+      if (button) button.disabled = true;
+      try {
+        const response = await fetch('/api/send-email', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'callback', phone })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || 'Impossible d’envoyer la demande.');
+        if (callbackModal) callbackModal.classList.remove('active');
+        document.body.classList.remove('no-scroll');
+        callbackForm.reset();
+        showToastNotification('Votre demande de rappel a été transmise à Wicka Assistance.');
+      } catch (error) {
+        showToastNotification(error.message || 'Une erreur est survenue.', 'warning');
+      } finally {
+        if (button) button.disabled = false;
+      }
     });
   }
 }

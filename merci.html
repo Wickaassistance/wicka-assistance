@@ -67,14 +67,11 @@
             </div>
             <div class="thanks-step">
               <div class="thanks-step-num">3</div>
-              <div><h4>Réponse sous 24h</h4><p>Vous recevez votre évaluation et votre devis dans votre monnaie locale.</p></div>
+              <div><h4>Traitement de votre dossier</h4><p>Vous recevez votre évaluation et votre devis dans votre monnaie locale.</p></div>
             </div>
           </div>
 
           <div class="thanks-actions">
-            <a id="thanksWhatsapp" href="https://wa.me/212789095498" target="_blank" class="btn-primary btn-full" style="background:#25D366;border-color:#25D366;">
-              <i class="fab fa-whatsapp"></i> <span>Finaliser sur WhatsApp (+212 7 89 09 54 98)</span>
-            </a>
             <a href="index.html" class="btn-secondary btn-full">
               <i class="fas fa-arrow-left"></i> <span>Retour à l'accueil</span>
             </a>
@@ -88,11 +85,9 @@
 
   <script>
     (function () {
-      var PHONE = '212789095498';
       var data = null;
       try { data = JSON.parse(sessionStorage.getItem('wickaApplication') || 'null'); } catch (e) {}
 
-      var waLink = document.getElementById('thanksWhatsapp');
       var recap = document.getElementById('thanksRecap');
       var title = document.getElementById('thanksTitle');
       var lead = document.getElementById('thanksLead');
@@ -100,7 +95,7 @@
       if (data && data.fullName) {
         var first = String(data.fullName).trim().split(' ')[0];
         if (first) title.innerHTML = 'Merci ' + first + ' ! 🎉';
-        lead.textContent = 'Votre candidature est bien enregistrée. Dernière étape : finalisez sur WhatsApp pour un traitement prioritaire.';
+        lead.textContent = 'Votre candidature a bien été transmise. Merci pour votre confiance.';
 
         recap.style.display = 'block';
         recap.innerHTML =
@@ -110,19 +105,6 @@
           '<div class="summary-row"><strong>Université :</strong> <span>' + esc(data.targetUniversity) + '</span></div>' +
           '<div class="summary-row"><strong>Formule :</strong> <span>' + esc(data.selectedPack) + '</span></div>' +
           '<div class="summary-row"><strong>Navette aéroport :</strong> <span>' + esc(data.airportTransfer) + '</span></div>';
-
-        var msg = 'Bonjour Wicka Assistance ! 👋\nJe viens de soumettre ma candidature pour étudier au Maroc.\n\n' +
-          '👤 Nom : ' + data.fullName + '\n' +
-          '🌍 Pays : ' + data.country + '\n' +
-          '🎓 Niveau : ' + data.currentLevel + ' (' + data.bacSeries + ')\n' +
-          '📚 Filière : ' + data.studyDomain + '\n' +
-          '🏫 Établissement : ' + data.targetUniversity + '\n' +
-          '📦 Formule : ' + data.selectedPack + '\n' +
-          '🚗 Navette Aéroport : ' + data.airportTransfer + '\n\n' +
-          'Merci de m\'indiquer la suite des démarches !';
-        waLink.href = 'https://wa.me/' + PHONE + '?text=' + encodeURIComponent(msg);
-      } else {
-        waLink.href = 'https://wa.me/' + PHONE + '?text=' + encodeURIComponent('Bonjour Wicka Assistance, je souhaite finaliser ma candidature pour étudier au Maroc.');
       }
 
       function esc(s) {

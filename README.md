@@ -98,6 +98,6 @@ Les photos des villes (`assets/uni/`) proviennent d'**[Unsplash](https://unsplas
 
 Les formulaires n’utilisent aucune base de données. La fonction `api/send-email.js` envoie deux e-mails via Brevo pour chaque formulaire : une notification à l’adresse de la société et une confirmation à l’utilisateur.
 
-Sur Vercel, configurer les variables présentes dans `.env.example` : `BREVO_API_KEY`, `BREVO_FROM_EMAIL`, `BREVO_FROM_NAME` et `BREVO_COMPANY_EMAIL`. L’adresse expéditrice doit être vérifiée dans Brevo. Ne jamais mettre la clé API dans HTML ou JavaScript côté navigateur.
+Sur Vercel, configurer les variables présentes dans `.env.example` : `BREVO_API_KEY`, `BREVO_FROM_EMAIL`, `BREVO_FROM_NAME`, `BREVO_COMPANY_EMAIL`, `PUBLIC_SITE_URL` et `BREVO_LOGO_URL`. L’adresse expéditrice doit être vérifiée dans Brevo. `BREVO_LOGO_URL` doit pointer vers le logo public du site, par exemple `https://votre-domaine.com/assets/images/logo.png`, afin que Brevo puisse l’afficher dans les emails. Ne jamais mettre la clé API dans HTML ou JavaScript côté navigateur.
 
 Le formulaire de contact et la candidature nécessitent donc un déploiement Vercel ou un autre hébergeur compatible avec les fonctions serverless. GitHub Pages peut servir les pages, mais ne peut pas exécuter `api/send-email.js`.
