@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Page introuvable | Wicka Assistance</title>
+  <meta name="description" content="La page demandée n'existe pas ou a été déplacée. Retrouvez Wicka Assistance pour vos études au Maroc." />
+  <meta name="robots" content="noindex, follow" />
+  <link rel="icon" type="image/png" href="/assets/images/logo.png" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+  <style>
+    .error-page { min-height: 100vh; display: grid; place-items: center; padding: 32px 20px; background: var(--rose-soft, #fff5f7); }
+    .error-card { width: min(680px, 100%); padding: 56px 32px; text-align: center; background: #fff; border-radius: 28px; box-shadow: var(--shadow-xl, 0 20px 48px rgba(159, 18, 57, .14)); }
+    .error-logo { width: 72px; height: 60px; object-fit: contain; margin: 0 auto 20px; }
+    .error-code { margin: 8px 0; color: var(--rose-800, #9f1239); font: 800 clamp(5rem, 18vw, 9rem)/.95 Outfit, sans-serif; letter-spacing: -.08em; }
+    .error-card h1 { margin: 12px 0; font: 700 clamp(1.6rem, 4vw, 2.4rem)/1.2 Outfit, sans-serif; color: var(--slate-900, #0f172a); }
+    .error-card p { max-width: 520px; margin: 0 auto 28px; color: var(--slate-600, #475569); font: 400 1rem/1.7 'Plus Jakarta Sans', sans-serif; }
+    .error-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <main class="error-page">
+    <section class="error-card" aria-labelledby="error-title">
+      <img class="error-logo" src="/assets/images/logo.png" alt="Wicka Assistance" width="72" height="60" />
+      <div class="error-code" aria-hidden="true">404</div>
+      <h1 id="error-title">Page introuvable</h1>
+      <p>La page que vous cherchez n'existe pas ou a été déplacée. Retournez à l'accueil ou échangez avec un conseiller Wicka Assistance.</p>
+      <div class="error-actions">
+        <a class="btn-primary" href="/">Retour à l'accueil</a>
+        <a class="btn-secondary" href="/universites.html">Voir les universités</a>
+        <a class="btn-secondary" href="https://wa.me/212789095498" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
