@@ -20,21 +20,112 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ============================================================
+   PROMO −50% : RÈGLE ANNUELLE (fuseau GMT+0 / UTC)
+   ------------------------------------------------------------
+   Cette fonction DOIT rester identique à getPromo() dans src/config/site.ts.
+   - Promo ACTIVE du 1er août 00:00:00 au 15 novembre 23:59:59 (UTC) de chaque année.
+   - Hors de cette période (16 nov. → 31 juil.) : compte à rebours, bandeau, badges
+     et prix promo sont masqués, les prix pleins s'affichent.
+   - Réapparition automatique le 1er août suivant, sans modification manuelle.
+   Voir la section « Promo » du README.
+   ============================================================ */
+function getPromoWindow(now = new Date()) {
+  const y = now.getUTCFullYear();
+  const start = Date.UTC(y, 7, 1, 0, 0, 0); // 1er août (mois 7 = août, base 0)
+  const end = Date.UTC(y, 10, 15, 23, 59, 59); // 15 novembre (mois 10 = novembre)
+  const t = now.getTime();
+  return { active: t >= start && t <= end, deadline: end };
+}
+
+/** Retire du DOM tous les éléments promotionnels (classe .promo-only). */
+function removePromoElements() {
+  // .promo-only = éléments marqués ; « .top-notice-bar .notice-left » = bandeau promo du header
+  // (couvre aussi les pages HTML statiques qui n'ont pas la classe .promo-only).
+  document.querySelectorAll('.promo-only, .top-notice-bar .notice-left').forEach((el) => el.remove());
+}
+
+/**
+ * Remplace les textes promo par leur version « prix plein » / standard.
+ * Convention : un élément qui affiche un prix ou un libellé promo porte
+ * data-full-text="valeur hors promo" (posé par le serveur dans Tarifs.tsx et
+ * FloatingActions.tsx). Appelé hors période ou à l'échéance du compte à rebours.
+ */
+function showFullTexts() {
+  document.querySelectorAll('[data-full-text]').forEach((el) => {
+    el.textContent = el.getAttribute('data-full-text');
+  });
+  // Barre CTA mobile : « Postuler (Promo −50%) » → « Postuler maintenant » (toutes les pages)
+  document.querySelectorAll('.mobile-sticky-cta .msc-primary').forEach((el) => {
+    el.innerHTML = '<i class="fas fa-paper-plane"></i> Postuler maintenant';
+  });
+}
+
+/**
+ * Rentrée visée (ex. « 2026-2027 »). Identique à la règle de getPromo() / du Worker :
+ * après le 15 novembre, on vise la rentrée de l'année suivante.
+ * Les éléments [data-rentree] sont mis à jour ; le texte du bandeau promo aussi.
+ */
+function getRentree(now = new Date()) {
+  const y = now.getUTCFullYear();
+  const end = Date.UTC(y, 10, 15, 23, 59, 59);
+  const ref = now.getTime() > end ? y + 1 : y;
+  return `${ref}-${ref + 1}`;
+}
+
+function applyRentree() {
+  const rentree = getRentree();
+  document.querySelectorAll('[data-rentree]').forEach((el) => { el.textContent = rentree; });
+  const notice = document.querySelector('.top-notice-bar .notice-left > span:nth-child(2)');
+  if (notice && getPromoWindow().active) {
+    notice.textContent = `📢 Offre de lancement Rentrée ${rentree} : packs d'admission à prix cassés — places et tarifs limités !`;
+  }
+}
+
+/* ============================================================
    COMPTE À REBOURS PROMOTION
+   - Lit la deadline fournie par le serveur (data-promo-deadline, ISO UTC),
+     sinon calcule celle de l'année en cours.
+   - À l'échéance (ou hors période) : retire tous les .promo-only et prévient
+     le reste du site via l'événement « wicka:promo-ended ».
    ============================================================ */
 function initPromoCountdown() {
-  const el = document.getElementById('promoCountdown');
-  if (!el) return;
-  const deadline = new Date(el.getAttribute('data-deadline')).getTime();
+  const promo = getPromoWindow();
+  document.documentElement.classList.toggle('promo-active', promo.active);
+  applyRentree();
+
+  // Hors période (ex. page restée en cache) : on retire tout élément promo.
+  if (!promo.active) {
+    removePromoElements();
+    showFullTexts();
+    return;
+  }
+
+  const holder = document.querySelector('[data-promo-deadline]');
+  if (!holder && !document.querySelector('.promo-only')) return; // rien à gérer sur cette page
+
+  let deadline = holder ? Date.parse(holder.getAttribute('data-promo-deadline')) : NaN;
+  if (isNaN(deadline)) deadline = promo.deadline;
+
+  const box = document.getElementById('promoCountdown');
   const dEl = document.getElementById('pcDays');
   const hEl = document.getElementById('pcHours');
   const mEl = document.getElementById('pcMins');
   const sEl = document.getElementById('pcSecs');
   const pad = (n) => String(n).padStart(2, '0');
 
+  const endPromo = () => {
+    removePromoElements();
+    showFullTexts();
+    document.documentElement.classList.remove('promo-active');
+    document.dispatchEvent(new CustomEvent('wicka:promo-ended'));
+  };
+
   const tick = () => {
-    let diff = deadline - Date.now();
-    if (diff < 0) diff = 0;
+    const diff = deadline - Date.now();
+    if (diff <= 0) {
+      endPromo();
+      return;
+    }
     const d = Math.floor(diff / 86400000);
     const h = Math.floor((diff % 86400000) / 3600000);
     const m = Math.floor((diff % 3600000) / 60000);
@@ -43,10 +134,11 @@ function initPromoCountdown() {
     if (hEl) hEl.innerText = pad(h);
     if (mEl) mEl.innerText = pad(m);
     if (sEl) sEl.innerText = pad(s);
+    if (box) box.classList.add('is-running'); // affiche les chiffres (évite le « 00 » initial)
+    setTimeout(tick, 1000);
   };
 
   tick();
-  setInterval(tick, 1000);
 }
 
 /* ============================================================
@@ -74,6 +166,16 @@ function initNavigation() {
       mobileToggle.setAttribute('aria-expanded', String(isOpen));
       document.body.classList.toggle('no-scroll', isOpen);
     });
+
+    const mobileClose = document.getElementById('mobileMenuClose');
+    if (mobileClose) {
+      mobileClose.addEventListener('click', () => {
+        mobileMenu.classList.remove('active');
+        mobileToggle.classList.remove('active');
+        mobileToggle.setAttribute('aria-expanded', 'false');
+        document.body.classList.remove('no-scroll');
+      });
+    }
 
     mobileLinks.forEach(link => {
       link.addEventListener('click', () => {
@@ -141,6 +243,9 @@ function initCounters() {
 
 /* ============================================================
    3. SÉLECTEUR INTERACTIF DE TARIFS PAR PAYS
+   PROMO : prix barrés + badge « PROMO -50% » uniquement si la promo est active
+   (1er août → 15 novembre, UTC). Sinon, affichage du prix plein
+   (packAdmissionOld / packVIPOld dans data.js = prix avant promo).
    ============================================================ */
 function initCountryPricingSwitcher() {
   const countrySelect = document.getElementById('pricingCountrySelect');
@@ -153,12 +258,23 @@ function initCountryPricingSwitcher() {
 
   if (!window.WICKA_DATA || !window.WICKA_DATA.countryPricings) return;
 
+  let currentCountryKey = 'senegal';
+
   const updateCountryView = (countryKey) => {
+    currentCountryKey = countryKey;
     const data = window.WICKA_DATA.countryPricings[countryKey] || window.WICKA_DATA.countryPricings.senegal;
-    
+    const promoActive = getPromoWindow().active;
+
+    // Prix promo (actif) ou prix plein (hors période)
+    const fullPrice = (oldP, newP) => (oldP || newP);
+    const shownPrice = (oldP, newP) => (promoActive ? newP : fullPrice(oldP, newP));
+
     const priceMarkup = (oldP, newP) => {
+      if (!promoActive) {
+        return `<span class="price-now">${fullPrice(oldP, newP)}</span>`;
+      }
       const oldHtml = oldP ? `<span class="price-old">${oldP}</span>` : '';
-      return `${oldHtml}<span class="price-now">${newP}</span><span class="price-promo-tag">PROMO -50%</span>`;
+      return `${oldHtml}<span class="price-now">${newP}</span><span class="price-promo-tag promo-only">PROMO -50%</span>`;
     };
 
     if (outCountryTitle) outCountryTitle.innerText = `Tarifs et Moyens de Paiement pour : ${data.name}`;
@@ -175,7 +291,10 @@ function initCountryPricingSwitcher() {
     // Update buttons in pricing cards as well
     document.querySelectorAll('.btn-order-pack').forEach(btn => {
       const packType = btn.getAttribute('data-pack');
-      const waMsg = encodeURIComponent(`Bonjour Wicka Assistance ! Je réside en/au ${data.name} et je souhaite souscrire au ${packType} (${packType === 'Pack Admission' ? data.packAdmission : data.packVIP}).`);
+      const price = packType === 'Pack Admission'
+        ? shownPrice(data.packAdmissionOld, data.packAdmission)
+        : shownPrice(data.packVIPOld, data.packVIP);
+      const waMsg = encodeURIComponent(`Bonjour Wicka Assistance ! Je réside en/au ${data.name} et je souhaite souscrire au ${packType} (${price}).`);
       btn.href = `https://wa.me/212789095498?text=${waMsg}`;
     });
   };
@@ -197,6 +316,9 @@ function initCountryPricingSwitcher() {
       updateCountryView(val);
     });
   });
+
+  // Si la promo se termine pendant la visite : on repasse aux prix pleins.
+  document.addEventListener('wicka:promo-ended', () => updateCountryView(currentCountryKey));
 
   // Init with default (Senegal or first)
   updateCountryView('senegal');
@@ -222,7 +344,7 @@ function initUniversityFilters() {
     const list = window.WICKA_DATA.universities.filter(uni => {
       const matchDomain = (currentDomain === 'all' || uni.domain === currentDomain);
       const matchCity = (currentCity === 'all' || uni.city === currentCity);
-      const matchSearch = searchQuery === '' || 
+      const matchSearch = searchQuery === '' ||
         uni.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         uni.popularPrograms.some(p => p.toLowerCase().includes(searchQuery.toLowerCase())) ||
         uni.domainLabel.toLowerCase().includes(searchQuery.toLowerCase());
@@ -280,7 +402,7 @@ function initUniversityFilters() {
               ${tagsHtml}
             </div>
             <p class="uni-desc">${escapeHtml(uni.description)}</p>
-            
+
             <div class="uni-programs-box">
               <h4>Formations Phares :</h4>
               <ul>${programsHtml}</ul>
@@ -389,11 +511,11 @@ function initBudgetSimulator() {
   const calculateBudget = () => {
     const selectedCityKey = citySelect.value || 'casablanca';
     const cityData = window.WICKA_DATA.citiesCost[selectedCityKey] || window.WICKA_DATA.citiesCost.casablanca;
-    
+
     // Type d'école
     let selectedUniType = 'prive_standard';
     uniTypeRadios.forEach(r => { if (r.checked) selectedUniType = r.value; });
-    
+
     let annualTuitionMAD = 48000;
     if (selectedUniType === 'prive_excellence') annualTuitionMAD = 68000;
     if (selectedUniType === 'prive_standard') annualTuitionMAD = 46000;
@@ -827,7 +949,7 @@ window.showToastNotification = function(msg) {
    10. MODALS
    ============================================================ */
 function initModals() {
-  const closeButtons = document.querySelectorAll('.modal-close-btn, .modal-backdrop');
+  const closeButtons = document.querySelectorAll('.modal-close-btn, .modal-close-btn-action, .modal-backdrop');
 
   closeButtons.forEach(btn => {
     btn.addEventListener('click', () => {
