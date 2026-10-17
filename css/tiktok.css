@@ -177,3 +177,6 @@
   .tiktok-actions .btn-tiktok,
   .tiktok-actions .btn-secondary { width: 100%; }
 }
+
+/* Pas de vidéo valide : on masque le ▶, la carte ouvre le profil TikTok */
+.tiktok-card.is-no-video .tiktok-play-btn { display: none; }
