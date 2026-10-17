@@ -546,7 +546,8 @@
 
     <!-- ============================================================
          SECTION TIKTOK : aperçu local, la vidéo ne se charge qu'au clic (js/tiktok.js)
-         À remplacer : @VOTRE_COMPTE (4 fois), VOTRE_VIDEO_ID, assets/images/tiktok-preview.jpg
+         À remplacer : @VOTRE_COMPTE (partout), VOTRE_VIDEO_ID, puis déposer assets/images/tiktok-preview.jpg
+         (tant que ce fichier manque, assets/uni/student-portrait.jpg s'affiche à la place : data-fallback-src)
          ============================================================ -->
     <section class="tiktok-section" id="tiktok">
       <div class="container">
@@ -570,8 +571,8 @@
 
           <div class="tiktok-visual">
             <div class="tiktok-card">
-              <a href="https://www.tiktok.com/@VOTRE_COMPTE/video/VOTRE_VIDEO_ID" target="_blank" rel="noopener noreferrer" class="tiktok-play" data-tiktok-play aria-label="Lire la vidéo TikTok">
-                <img src="assets/images/tiktok-preview.jpg" alt="Aperçu de notre dernière vidéo TikTok" width="540" height="960" loading="lazy" />
+              <a href="https://www.tiktok.com/@VOTRE_COMPTE/video/VOTRE_VIDEO_ID" target="_blank" rel="noopener noreferrer" class="tiktok-play" data-tiktok-play data-profile-url="https://www.tiktok.com/@VOTRE_COMPTE" aria-label="Lire la vidéo TikTok">
+                <img src="assets/images/tiktok-preview.jpg" data-fallback-src="assets/uni/student-portrait.jpg" alt="Aperçu de notre dernière vidéo TikTok" width="540" height="960" loading="lazy" />
                 <span class="tiktok-play-btn"><i class="fas fa-play"></i></span>
                 <span class="tiktok-card-tag"><i class="fab fa-tiktok"></i> @VOTRE_COMPTE</span>
               </a>
