@@ -16,7 +16,7 @@
   <meta property="og:locale" content="fr_FR" />
   <meta property="og:title" content="Tarifs études au Maroc | Packs et accompagnement" />
   <meta property="og:description" content="Découvrez les tarifs d’accompagnement pour étudier au Maroc : orientation, admission, visa, accueil et services adaptés à votre pays." />
-  <meta property="og:url" content="__PUBLIC_SITE_URL__//tarifs" />
+  <meta property="og:url" content="__PUBLIC_SITE_URL__/tarifs" />
   <meta property="og:image" content="__PUBLIC_SITE_URL__/assets/images/og-share.jpg" />
   <meta property="og:image:secure_url" content="__PUBLIC_SITE_URL__/assets/images/og-share.jpg" />
   <meta property="og:image:type" content="image/jpeg" />
@@ -27,7 +27,7 @@
   <meta name="twitter:title" content="Tarifs études au Maroc | Packs et accompagnement" />
   <meta name="twitter:description" content="Découvrez les tarifs d’accompagnement pour étudier au Maroc : orientation, admission, visa, accueil et services adaptés à votre pays." />
   <meta name="twitter:image" content="__PUBLIC_SITE_URL__/assets/images/og-share.jpg" />
-  <link rel="canonical" href="__PUBLIC_SITE_URL__//tarifs" />
+  <link rel="canonical" href="__PUBLIC_SITE_URL__/tarifs" />
 
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
@@ -38,6 +38,14 @@
   <link rel="stylesheet" href="css/responsive.css" />
 </head>
 <body>
+<!--
+  PROMO −50% (règle annuelle, GMT+0) : voir README, section « Promo ».
+  Visible du 1er août au 15 novembre. Hors période, le Worker (worker/index.js) retire le bandeau,
+  les éléments class="promo-only" et remplace les textes/prix data-full-text par la version
+  « prix plein » (js/main.js fait la même chose côté navigateur en filet de sécurité).
+  Convention : tout élément promo = class="promo-only" ; tout prix/texte promo qui doit changer
+  = data-full-text="valeur hors promo". Ne jamais écrire de date ici.
+-->
 <div class="top-notice-bar">
     <div class="container notice-content">
       <div class="notice-left">
@@ -146,7 +154,8 @@
 
         <!-- Widget Sélecteur de Pays -->
         <div class="country-pricing-widget">
-          <div class="promo-ribbon-bar">
+          <!-- Ruban promo : uniquement du 1er août au 15 novembre (retiré hors période) -->
+          <div class="promo-ribbon-bar promo-only">
             <span class="promo-flame">🔥</span>
             <div class="promo-ribbon-text">
               <strong>PROMOTION DE LANCEMENT −50%</strong>
@@ -184,7 +193,7 @@
             </select>
           </div>
 
-          <!-- Affichage dynamique du prix par pays -->
+          <!-- Affichage dynamique du prix par pays (rempli par js/main.js : prix promo pendant la promo, prix pleins sinon) -->
           <div class="country-display-grid">
             <!-- Pack Admission -->
             <div class="country-pack-col">
@@ -224,7 +233,7 @@
             <p id="countryOutNote" style="font-size: 0.82rem; color: var(--slate-500); margin-top: 10px;">
               Paiement local sans frais de change via Wave / Orange Money. Reçu officiel et contrat délivrés instantanément.
             </p>
-            <p class="promo-disclaimer">
+            <p class="promo-disclaimer promo-only">
               <i class="fas fa-circle-info"></i> Prix promotionnels de lancement, susceptibles d'évoluer à tout moment. Tarif garanti dès la signature du contrat.
             </p>
           </div>
@@ -371,9 +380,10 @@
 <section class="pricing-section" id="packs">
       <div class="container">
         <div class="section-header">
-          <span class="section-badge badge-promo"><i class="fas fa-fire"></i> Promo Lancement −50%</span>
+          <!-- Badge promo : retiré hors période promo -->
+          <span class="section-badge badge-promo promo-only"><i class="fas fa-fire"></i> Promo Lancement −50%</span>
           <h2 class="section-title">Choisissez la Formule Adaptée à Votre Projet</h2>
-          <p class="section-subtitle">
+          <p class="section-subtitle" data-full-text="Des formules claires et accessibles, payables localement dans votre devise (Wave, Orange Money, MTN, Virement).">
             Profitez de nos <strong>tarifs promotionnels de lancement</strong> — parmi les plus accessibles du marché — payables localement dans votre devise (Wave, Orange Money, MTN, Virement).
           </p>
         </div>
@@ -385,12 +395,16 @@
               <span class="badge-rose-soft">Pour démarrer</span>
               <h3 class="pack-name">Pack Diagnostic et Orientation</h3>
               <p style="font-size: 0.85rem; color: var(--slate-500);">Analyse de dossier et sélection des universités</p>
+              <!--
+                Prix : pendant la promo → prix barré + prix promo + pourcentage.
+                Hors promo → uniquement le prix plein (data-full-text = prix plein).
+              -->
               <div class="pack-price-box">
-                <span class="pack-price-old">590 DH</span>
-                <span class="pack-price">290 DH</span>
-                <span class="pack-price-cut">−51%</span>
+                <span class="pack-price-old promo-only">590 DH</span>
+                <span class="pack-price" data-full-text="590 DH">290 DH</span>
+                <span class="pack-price-cut promo-only">−51%</span>
               </div>
-              <span class="pack-subprice">🔥 Prix PROMO de lancement · ~18 000 FCFA / 27 € · Sans engagement</span>
+              <span class="pack-subprice" data-full-text="Prix standard · ~36 000 FCFA / 54 € · Sans engagement">🔥 Prix PROMO de lancement · ~18 000 FCFA / 27 € · Sans engagement</span>
             </div>
 
             <ul class="pack-features-list">
@@ -401,7 +415,7 @@
               <li><i class="fas fa-check-circle"></i> Entretien d'orientation de 30 min avec un expert</li>
             </ul>
 
-            <a href="https://wa.me/212789095498?text=Bonjour%20Wicka%2C%20je%20souhaite%20souscrire%20au%20Pack%20Diagnostic%20%26%20Orientation%20(290%20DH)." target="_blank" rel="noopener noreferrer" class="btn-secondary btn-full">
+            <a href="https://wa.me/212789095498?text=Bonjour%20Wicka%2C%20je%20souhaite%20souscrire%20au%20Pack%20Diagnostic%20et%20Orientation." target="_blank" rel="noopener noreferrer" class="btn-secondary btn-full">
               <i class="fab fa-whatsapp text-rose"></i> <span>Souscrire au Diagnostic</span>
             </a>
           </div>
@@ -414,11 +428,11 @@
               <h3 class="pack-name" style="margin-top: 8px;">Pack Admission Réussie</h3>
               <p style="font-size: 0.85rem; color: var(--slate-500);">Admission officielle dans l'université privée ciblée</p>
               <div class="pack-price-box">
-                <span class="pack-price-old">1 990 DH</span>
-                <span class="pack-price">990 DH</span>
-                <span class="pack-price-cut">−50%</span>
+                <span class="pack-price-old promo-only">1 990 DH</span>
+                <span class="pack-price" data-full-text="1 990 DH">990 DH</span>
+                <span class="pack-price-cut promo-only">−50%</span>
               </div>
-              <span class="pack-subprice">🔥 Prix PROMO de lancement · ~60 000 FCFA / 92 € (Wave, Orange Money)</span>
+              <span class="pack-subprice" data-full-text="Prix standard · ~120 000 FCFA / 185 € (Wave, Orange Money)">🔥 Prix PROMO de lancement · ~60 000 FCFA / 92 € (Wave, Orange Money)</span>
             </div>
 
             <ul class="pack-features-list">
@@ -444,11 +458,11 @@
               <h3 class="pack-name">Pack VIP et Navette Aéroport</h3>
               <p style="font-size: 0.85rem; color: var(--slate-500);">Prise en charge complète dès l'atterrissage</p>
               <div class="pack-price-box">
-                <span class="pack-price-old">3 890 DH</span>
-                <span class="pack-price">1 990 DH</span>
-                <span class="pack-price-cut">−49%</span>
+                <span class="pack-price-old promo-only">3 890 DH</span>
+                <span class="pack-price" data-full-text="3 890 DH">1 990 DH</span>
+                <span class="pack-price-cut promo-only">−49%</span>
               </div>
-              <span class="pack-subprice">🔥 Prix PROMO de lancement · ~120 000 FCFA / 185 € (chauffeur inclus)</span>
+              <span class="pack-subprice" data-full-text="Prix standard · ~235 000 FCFA / 360 € (chauffeur inclus)">🔥 Prix PROMO de lancement · ~120 000 FCFA / 185 € (chauffeur inclus)</span>
             </div>
 
             <ul class="pack-features-list">
@@ -468,8 +482,10 @@
           </div>
         </div>
 
+        <!-- Mention de bas de page : le texte promo est remplacé par une mention neutre hors période -->
         <p class="promo-disclaimer promo-disclaimer-center">
-          <i class="fas fa-circle-info"></i> Offre promotionnelle de lancement à durée et places limitées. Les tarifs affichés sont susceptibles d'évoluer à tout moment ; votre prix est bloqué et garanti dès la signature du contrat.
+          <i class="fas fa-circle-info"></i>
+          <span data-full-text="Les tarifs affichés sont susceptibles d'évoluer à tout moment ; votre prix est bloqué et garanti dès la signature du contrat.">Offre promotionnelle de lancement à durée et places limitées. Les tarifs affichés sont susceptibles d'évoluer à tout moment ; votre prix est bloqué et garanti dès la signature du contrat.</span>
         </p>
       </div>
     </section>
@@ -566,7 +582,7 @@
     <span class="wa-badge-online" title="Conseiller WhatsApp en ligne"></span>
   </a>
 
-  <!-- Barre CTA fixe (mobile) -->
+  <!-- Barre CTA fixe (mobile) : le libellé « Promo −50% » est remplacé par « Postuler maintenant » hors période promo (Worker + js/main.js) -->
   <div class="mobile-sticky-cta">
     <a href="/candidature" class="msc-btn msc-primary">
       <i class="fas fa-paper-plane"></i> Postuler (Promo −50%)
