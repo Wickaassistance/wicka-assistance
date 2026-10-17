@@ -59,6 +59,12 @@
   </script>
 </head>
 <body>
+<!--
+  PROMO −50% (règle annuelle, GMT+0) : voir README, section « Promo ».
+  Visible du 1er août au 15 novembre. Hors période, le Worker (worker/index.js) retire ce bandeau,
+  les éléments class="promo-only" et remplace les textes data-full-text (js/main.js fait la même
+  chose côté navigateur en filet de sécurité). Ne pas modifier de date ici.
+-->
 <div class="top-notice-bar">
     <div class="container notice-content">
       <div class="notice-left">
@@ -179,7 +185,8 @@
             <div class="hero-cta-group">
               <a href="/candidature" class="btn-primary">
                 <i class="fas fa-graduation-cap"></i>
-                <span>Démarrer la Candidature 2026-2027</span>
+                <!-- data-rentree : année de rentrée mise à jour automatiquement (Worker + js/main.js) -->
+                <span>Démarrer la Candidature <span data-rentree>2026-2027</span></span>
               </a>
               <a href="https://wa.me/212789095498" target="_blank" rel="noopener noreferrer" class="btn-secondary">
                 <i class="fab fa-whatsapp text-rose"></i>
@@ -339,13 +346,14 @@
           <a href="/tarifs" class="explore-card">
             <div class="explore-icon"><i class="fas fa-tags"></i></div>
             <h3>Tarifs, Simulateur et Packs</h3>
-            <p>Tarifs par pays en <strong>promo −50%</strong>, simulateur de budget et formules d'assistance.</p>
+            <!-- Les segments promo-only disparaissent hors période promo -->
+            <p>Tarifs par pays<span class="promo-only"> en <strong>promo −50%</strong></span>, simulateur de budget et formules d'assistance.</p>
             <span class="explore-link">Voir les tarifs <i class="fas fa-arrow-right"></i></span>
           </a>
           <a href="/candidature" class="explore-card explore-card-accent">
             <div class="explore-icon"><i class="fas fa-paper-plane"></i></div>
             <h3>Déposer ma Candidature</h3>
-            <p>Formulaire en 4 étapes. Réponse d'un conseiller sous 24h et tarif promo bloqué.</p>
+            <p>Formulaire en 4 étapes. Réponse d'un conseiller sous 24h<span class="promo-only"> et tarif promo bloqué</span>.</p>
             <span class="explore-link">Postuler maintenant <i class="fas fa-arrow-right"></i></span>
           </a>
         </div>
@@ -535,11 +543,17 @@
 <section class="cta-photo-band" style="background-image: linear-gradient(115deg, rgba(76,5,25,0.92) 0%, rgba(159,18,57,0.82) 55%, rgba(190,18,60,0.7) 100%), url('assets/uni/tanger.jpg');">
       <div class="container">
         <div class="cta-photo-content">
-          <span class="cta-band-kicker light"><i class="fas fa-graduation-cap"></i> Rentrée 2026-2027 · Il reste peu de places</span>
+          <span class="cta-band-kicker light"><i class="fas fa-graduation-cap"></i> Rentrée <span data-rentree>2026-2027</span><span class="promo-only"> · Il reste peu de places</span></span>
           <h2>Votre avenir au Maroc commence par un simple message.</h2>
           <p>Admission garantie, visa, carte consulaire jusqu'à l'ambassade, navette aéroport et carte de séjour : on s'occupe de tout. Parlez à un conseiller dès maintenant.</p>
 
-          <div class="promo-countdown" id="promoCountdown" data-deadline="2026-09-30T23:59:59">
+          <!--
+            COMPTE À REBOURS PROMO : aucune date écrite ici.
+            L'échéance (15 novembre, GMT+0) est fournie par le Worker (attribut data-promo-deadline)
+            ou calculée par js/main.js. Hors période (16 nov. → 31 juil.), ce bloc est retiré
+            automatiquement (classe promo-only) et réapparaît le 1er août.
+          -->
+          <div class="promo-countdown promo-only" id="promoCountdown">
             <span class="pc-label"><i class="fas fa-hourglass-half"></i> Fin de la PROMO −50% dans :</span>
             <div class="pc-units">
               <div><strong id="pcDays">00</strong><span>jours</span></div>
@@ -581,7 +595,8 @@
         <div class="faq-cta-box">
           <div>
             <h3>Une autre question ? Un conseiller vous répond en quelques minutes.</h3>
-            <p>Ne restez pas dans le doute : profitez de la promo −50% avant la fin du compte à rebours.</p>
+            <!-- data-full-text : texte affiché hors période promo -->
+            <p data-full-text="Ne restez pas dans le doute : un conseiller vous accompagne à chaque étape de votre projet.">Ne restez pas dans le doute : profitez de la promo −50% avant la fin du compte à rebours.</p>
           </div>
           <div class="faq-cta-actions">
             <a href="https://wa.me/212789095498?text=Bonjour%20Wicka%2C%20j'ai%20une%20question%20avant%20de%20souscrire." target="_blank" rel="noopener noreferrer" class="btn-cta-white"><i class="fab fa-whatsapp"></i> Poser ma question sur WhatsApp</a>
@@ -683,7 +698,7 @@
     <span class="wa-badge-online" title="Conseiller WhatsApp en ligne"></span>
   </a>
 
-  <!-- Barre CTA fixe (mobile) -->
+  <!-- Barre CTA fixe (mobile) : le libellé « Promo −50% » est remplacé par « Postuler maintenant » hors période promo (Worker + js/main.js) -->
   <div class="mobile-sticky-cta">
     <a href="/candidature" class="msc-btn msc-primary">
       <i class="fas fa-paper-plane"></i> Postuler (Promo −50%)
