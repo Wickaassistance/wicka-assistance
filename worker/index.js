@@ -69,12 +69,69 @@ function llms(origin) {
   return `# Wicka Assistance\n\n> Wicka Assistance accompagne les étudiants internationaux et leurs familles dans leur projet d'études au Maroc.\n\n## Pages publiques\n\n- [Accueil](${origin}/)\n- [Candidature](${origin}/candidature.html)\n- [Formations et orientation](${origin}/universites.html)\n- [Tarifs](${origin}/tarifs.html)\n- [Contact](${origin}/contact.html)\n- [Politique de confidentialité](${origin}/politique-confidentialite.html)\n- [Mentions légales](${origin}/mentions-legales.html)\n- [Conditions générales](${origin}/cgv.html)\n\n## Règles\n\nUtiliser uniquement les informations publiques du site. Ne pas inventer de tarifs, de garanties d'admission ou de décisions administratives.\n`;
 }
 
+/* ============================================================
+   PROMO −50% : RÈGLE ANNUELLE (fuseau GMT+0 / UTC)
+   ------------------------------------------------------------
+   - Promo ACTIVE du 1er août 00:00:00 au 15 novembre 23:59:59 (UTC) de chaque année.
+   - Hors période (16 nov. → 31 juil.) : le Worker RETIRE du HTML, avant l'envoi au
+     navigateur, le compte à rebours, le bandeau promo du header, les badges et prix
+     barrés (éléments .promo-only), et remplace les prix/libellés promo par leur version
+     « prix plein » (attribut data-full-text).
+   - Le 1er août suivant, tout réapparaît automatiquement (aucune modification manuelle).
+   - Cette règle existe en 2 copies qui DOIVENT rester identiques :
+       1. ce fichier (rendu serveur, rapide, sans clignotement)
+       2. public/js/main.js → getPromoWindow() (filet de sécurité côté navigateur)
+   Voir la section « Promo » du README.
+   ============================================================ */
+function promoState(now = new Date()) {
+  const y = now.getUTCFullYear();
+  const start = Date.UTC(y, 7, 1, 0, 0, 0); // 1er août (mois 7 = août, base 0)
+  const end = Date.UTC(y, 10, 15, 23, 59, 59); // 15 novembre (mois 10 = novembre)
+  const t = now.getTime();
+  const ref = t > end ? y + 1 : y; // après le 15 nov., on vise la rentrée suivante
+  return {
+    active: t >= start && t <= end,
+    deadline: new Date(end).toISOString(),
+    rentree: `${ref}-${ref + 1}`
+  };
+}
+
+function applyPromo(rewriter, promo) {
+  // Toujours : rentrée visée (ex. « 2026-2027 ») et échéance du compte à rebours
+  rewriter
+    .on("[data-rentree]", { element: (el) => el.setInnerContent(promo.rentree) })
+    .on("#promoCountdown", { element: (el) => el.setAttribute("data-promo-deadline", promo.deadline) });
+
+  if (promo.active) {
+    // Texte du bandeau promo (toutes les pages) : rentrée toujours à jour
+    rewriter.on(".top-notice-bar .notice-left > span:nth-child(2)", {
+      element: (el) =>
+        el.setInnerContent(
+          `📢 Offre de lancement Rentrée ${promo.rentree} : packs d'admission à prix cassés — places et tarifs limités !`
+        )
+    });
+    return;
+  }
+
+  // Hors période : on retire tout le promotionnel et on affiche les prix pleins
+  rewriter
+    .on(".promo-only", { element: (el) => el.remove() })
+    .on(".top-notice-bar .notice-left", { element: (el) => el.remove() })
+    .on("[data-full-text]", { element: (el) => el.setInnerContent(el.getAttribute("data-full-text") || "") })
+    .on(".mobile-sticky-cta .msc-primary", {
+      element: (el) => el.setInnerContent('<i class="fas fa-paper-plane"></i> Postuler maintenant', { html: true })
+    })
+    // Prix par pays affichés avant le chargement du JS (le JS prend ensuite le relais)
+    .on("#countryOutAdmissionPrice", { element: (el) => el.setInnerContent("120 000 FCFA") })
+    .on("#countryOutVipPrice", { element: (el) => el.setInnerContent("235 000 FCFA") });
+}
+
 function rewriteHtml(response, origin, request) {
   const pageUrl = new URL(request.url);
   const cleanPath = pageUrl.pathname.replace(/\.html$/, "") || "/";
   const canonical = `${origin}${cleanPath === "/index" ? "/" : cleanPath}`;
   const image = `${origin}/assets/images/og-share.jpg`;
-  return new HTMLRewriter()
+  const rewriter = new HTMLRewriter()
     .on('link[rel="canonical"]', { element: (el) => el.setAttribute("href", canonical) })
     .on('meta[property="og:url"]', { element: (el) => el.setAttribute("content", canonical) })
     .on('meta[property="og:image"]', { element: (el) => el.setAttribute("content", image) })
@@ -82,8 +139,16 @@ function rewriteHtml(response, origin, request) {
     .on('meta[name="twitter:image"]', { element: (el) => el.setAttribute("content", image) })
     .on('script[type="application/ld+json"]', { text: (chunk) => {
       chunk.text = chunk.text.replaceAll("__PUBLIC_SITE_URL__", origin);
-    } })
-    .transform(response);
+    } });
+
+  applyPromo(rewriter, promoState());
+
+  // Le HTML dépend de la date : le navigateur doit le revalider à chaque visite.
+  const transformed = rewriter.transform(response);
+  const headers = new Headers(transformed.headers);
+  headers.set("cache-control", "public, max-age=0, must-revalidate");
+  headers.delete("etag");
+  return new Response(transformed.body, { status: transformed.status, statusText: transformed.statusText, headers });
 }
 
 export default {
