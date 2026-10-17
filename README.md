@@ -12,6 +12,40 @@ Depuis le tableau de bord Cloudflare, ouvrir **Workers & Pages → Create applic
 npx wrangler deploy
 ```
 
+## Promo −50 % et compte à rebours (règle annuelle automatique)
+
+**Fuseau : GMT+0 (UTC).** Aucune modification manuelle n’est nécessaire d’une année à l’autre.
+
+| Période (UTC)                          | État de la promo                                                                               |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| 1er août 00:00:00 → 15 nov. 23:59:59   | **Active** : compte à rebours, bandeau du header, badges, prix barrés, libellés « Promo −50 % » |
+| 16 novembre → 31 juillet               | **Masquée** : rien de promotionnel n’est affiché, les prix pleins apparaissent                  |
+
+Le 1er août suivant, tout réapparaît automatiquement, avec une échéance au 15 novembre de l’année en cours. L’année de rentrée affichée (ex. `2026-2027`) passe à l’année suivante après le 15 novembre.
+
+### Comment ça marche (2 couches)
+
+1. **Worker (`worker/index.js`) — rendu serveur, sans clignotement.** La fonction `promoState()` calcule l’état à chaque requête. Avec `HTMLRewriter`, le Worker modifie le HTML avant de l’envoyer :
+   - hors période : retire les éléments `.promo-only` et le bandeau promo `.top-notice-bar .notice-left`, remplace le contenu des éléments `data-full-text` par leur valeur « prix plein », change le libellé de la barre mobile en « Postuler maintenant » et affiche les prix pleins par pays ;
+   - pendant la période : met à jour le texte du bandeau (rentrée) et fournit l’échéance au compte à rebours (`data-promo-deadline`) ;
+   - dans tous les cas : met à jour les éléments `[data-rentree]`.
+   Les pages HTML sont servies avec `cache-control: public, max-age=0, must-revalidate` car leur contenu dépend de la date.
+2. **Navigateur (`public/js/main.js`) — filet de sécurité.** `getPromoWindow()` applique la même règle : décompte à la seconde, retrait des éléments promo à l’échéance si la page reste ouverte, bascule vers les prix pleins (`showFullTexts()`), mise à jour de la rentrée (`applyRentree()`) et prix par pays selon la période.
+
+> `promoState()` (Worker) et `getPromoWindow()` (`main.js`) doivent rester **identiques**. La date de fin ne s’écrit jamais dans un fichier HTML.
+
+### Convention pour les pages HTML
+
+- Tout élément promotionnel : `class="promo-only"` (ruban, badge, prix barré, pourcentage, compte à rebours…).
+- Tout prix ou texte promo qui doit changer hors période : `data-full-text="valeur hors promo"` (le contenu affiché est la version promo).
+- Année de rentrée : `<span data-rentree>2026-2027</span>`.
+- Le bandeau du header et la barre CTA mobile sont gérés automatiquement sur **toutes** les pages (sélecteurs `.top-notice-bar .notice-left` et `.mobile-sticky-cta .msc-primary`) : aucune classe à ajouter.
+- Compte à rebours : pas d’attribut de date dans le HTML (`#promoCountdown` reçoit `data-promo-deadline` du Worker, ou `main.js` calcule l’échéance).
+
+### Test de la règle
+
+Dans `worker/index.js` (`promoState`) et `public/js/main.js` (`getPromoWindow`, `getRentree`), passer temporairement une date factice, par exemple `new Date("2026-11-16T00:00:00Z")` : tout le promo doit disparaître et les prix pleins s’afficher ; avec `2026-08-01T00:00:00Z`, tout doit revenir. Remettre ensuite le code normal. En local : `npx wrangler dev`.
+
 ## Variables et secrets
 
 Avant le déploiement, ajouter les secrets et variables Worker dans **Settings → Variables and Secrets** ou avec `npx wrangler secret put NOM_DU_SECRET` :
@@ -87,6 +121,8 @@ Le logo doit répondre en `200` avec un type MIME `image/png`. Vérifier égalem
 - `GET /cgv`
 - `GET /merci`
 - `POST /api/send-email`
+
+Vérifier aussi la promo : pendant la période (1er août → 15 novembre), le compte à rebours décompte sur `/`, le ruban et les prix barrés s’affichent sur `/tarifs` ; hors période, ils sont absents et les prix pleins (590, 1 990 et 3 890 DH) s’affichent.
 
 Tester ensuite un formulaire réel après avoir confirmé que les variables Brevo sont présentes. L’endpoint utilisé par le navigateur est `POST /api/send-email`.
 
