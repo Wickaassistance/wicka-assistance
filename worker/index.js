@@ -15,6 +15,12 @@ const requestWindows = new Map();
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX = 8;
 
+// Profil TikTok : à remplacer par le vrai lien (même valeur que dans public/index.html).
+// Le Worker ajoute l'icône TikTok au footer de TOUTES les pages qui ont un bloc .footer-social-links
+// (si l'icône y est déjà, comme sur l'accueil, il n'en ajoute pas une seconde).
+const TIKTOK_URL = "https://www.tiktok.com/@VOTRE_COMPTE";
+const TIKTOK_ICON_HTML = `<a href="${TIKTOK_URL}" target="_blank" rel="noopener noreferrer" class="social-icon-btn" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>`;
+
 function requestKey(request) {
   return request.headers.get("CF-Connecting-IP") || request.headers.get("x-forwarded-for") || "unknown";
 }
@@ -133,6 +139,7 @@ function rewriteHtml(response, origin, request) {
   const cleanPath = pageUrl.pathname.replace(/\.html$/, "") || "/";
   const canonical = `${origin}${cleanPath === "/index" ? "/" : cleanPath}`;
   const image = `${origin}/assets/images/og-share.jpg`;
+  let hasTikTokIcon = false;
   const rewriter = new HTMLRewriter()
     .on('link[rel="canonical"]', { element: (el) => el.setAttribute("href", canonical) })
     .on('meta[property="og:url"]', { element: (el) => el.setAttribute("content", canonical) })
@@ -141,6 +148,11 @@ function rewriteHtml(response, origin, request) {
     .on('meta[name="twitter:image"]', { element: (el) => el.setAttribute("content", image) })
     .on('script[type="application/ld+json"]', { text: (chunk) => {
       chunk.text = chunk.text.replaceAll("__PUBLIC_SITE_URL__", origin);
+    } })
+    // Icône TikTok du footer : détectée si déjà présente, sinon ajoutée en fin de bloc.
+    .on('.footer-social-links a[aria-label="TikTok"]', { element: () => { hasTikTokIcon = true; } })
+    .on(".footer-social-links", { element: (el) => {
+      el.onEndTag((end) => { if (!hasTikTokIcon) end.before(TIKTOK_ICON_HTML, { html: true }); });
     } });
 
   applyPromo(rewriter, promoState());
