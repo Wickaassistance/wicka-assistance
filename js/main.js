@@ -965,13 +965,15 @@ function initModals() {
     }
   });
 
-  const callbackTrigger = document.getElementById('triggerCallbackModal');
   const callbackModal = document.getElementById('callbackModal');
-  if (callbackTrigger && callbackModal) {
-    callbackTrigger.addEventListener('click', (e) => {
-      e.preventDefault();
-      callbackModal.classList.add('active');
-      document.body.classList.add('no-scroll');
+  if (callbackModal) {
+    document.querySelectorAll('[data-callback-trigger]').forEach((callbackTrigger) => {
+      callbackTrigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('mobileMenu')?.classList.remove('active');
+        callbackModal.classList.add('active');
+        document.body.classList.add('no-scroll');
+      });
     });
   }
 

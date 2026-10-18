@@ -103,18 +103,16 @@
         <!-- Liens Desktop -->
         <ul class="nav-links">
           <li><a href="/" class="nav-link active">Accueil</a></li>
-          <li><a href="/#parents" class="nav-link">Espace Parents</a></li>
+          <li><a href="/#parents" class="nav-link">Parents</a></li>
           <li><a href="/universites" class="nav-link">Universités</a></li>
           <li><a href="/tarifs" class="nav-link">Tarifs par Pays</a></li>
-          <li><a href="/tarifs#simulateur" class="nav-link">Simulateur de Budget</a></li>
-          <li><a href="/tarifs#packs" class="nav-link">Packs et Navette</a></li>
         </ul>
 
         <!-- Actions Nav -->
         <div class="nav-actions">
-          <button type="button" class="nav-callback-btn" id="triggerCallbackModal">
+          <button type="button" class="nav-callback-btn" id="triggerCallbackModal" data-callback-trigger>
             <i class="fas fa-phone-alt"></i>
-            <span>Être Rappelé</span>
+            <span>Rappelez-moi</span>
           </button>
           <a href="/candidature" class="btn-primary btn-sm">
             <i class="fas fa-paper-plane"></i>
@@ -142,19 +140,17 @@
     </div>
     <div class="mobile-nav-links">
       <a href="/" class="mobile-nav-link">Accueil <i class="fas fa-chevron-right"></i></a>
-      <a href="/#parents" class="mobile-nav-link">Espace Parents <i class="fas fa-chevron-right"></i></a>
+      <a href="/#parents" class="mobile-nav-link">Parents <i class="fas fa-chevron-right"></i></a>
       <a href="/universites" class="mobile-nav-link">Universités <i class="fas fa-chevron-right"></i></a>
       <a href="/tarifs" class="mobile-nav-link">Tarifs par Pays <i class="fas fa-chevron-right"></i></a>
-      <a href="/tarifs#simulateur" class="mobile-nav-link">Simulateur de Budget <i class="fas fa-chevron-right"></i></a>
-      <a href="/tarifs#packs" class="mobile-nav-link">Packs et Navette <i class="fas fa-chevron-right"></i></a>
     </div>
     <div style="margin-top: auto; display: flex; flex-direction: column; gap: 12px;">
       <a href="/candidature" class="btn-primary btn-full mobile-nav-link">
         <i class="fas fa-paper-plane"></i> Démarrer ma Candidature
       </a>
-      <a href="https://wa.me/212789095498" target="_blank" rel="noopener noreferrer" class="btn-secondary btn-full">
-        <i class="fab fa-whatsapp text-rose"></i> WhatsApp
-      </a>
+      <button type="button" class="btn-secondary btn-full mobile-callback-trigger" data-callback-trigger>
+        <i class="fas fa-phone-alt"></i> Rappelez-moi
+      </button>
     </div>
   </div>
 
