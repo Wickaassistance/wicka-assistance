@@ -1,14 +1,16 @@
 /**
  * Wicka Assistance - Section TikTok
  *
- * 1) IMAGE : la carte affiche d'abord l'aperçu réel (assets/images/tiktok-preview.jpg).
- *    Si ce fichier n'existe pas (ou ne charge pas), on affiche UNE FOIS l'image de secours
- *    déjà présente dans le dépôt (attribut data-fallback-src). Dès que le vrai fichier existe,
- *    l'image de secours n'est plus jamais utilisée.
+ * 1) AFFICHAGE : tant que le lien de la carte (data-tiktok-play) ne contient pas de vidéo valide
+ *    (…/video/123456…), rien n'est affiché à part le texte et les boutons : la colonne
+ *    image/vidéo reste masquée. Dès qu'un lien vidéo valide est renseigné dans index.html,
+ *    la colonne s'affiche automatiquement.
  *
- * 2) VIDÉO : la vidéo n'est chargée qu'au clic sur ▶ (aucun script ni traceur TikTok au chargement).
- *    - Lien vidéo valide (…/video/123456…) : le clic lance le lecteur TikTok dans la page.
- *    - Lien vidéo absent ou invalide (placeholder) : le ▶ est masqué et la carte ouvre le profil TikTok.
+ * 2) IMAGE : l'aperçu est assets/images/tiktok-preview.jpg. S'il est introuvable, il est retiré
+ *    et la carte garde son fond dégradé rose avec le bouton ▶ (aucune image de secours).
+ *
+ * 3) VIDÉO : la vidéo n'est chargée qu'au clic sur ▶ (aucun script ni traceur TikTok au chargement).
+ *    - Le clic lance le lecteur TikTok dans la page.
  *    - Ctrl/Cmd/Maj + clic : ouvre simplement TikTok dans un nouvel onglet.
  *
  * Nécessite : frame-src https://www.tiktok.com dans la CSP (worker/index.js).
@@ -17,39 +19,29 @@ document.addEventListener('DOMContentLoaded', () => {
   const link = document.querySelector('[data-tiktok-play]');
   if (!link) return;
 
-  const card = link.closest('.tiktok-card');
-  const img = link.querySelector('img');
-
-  /* ---------- 1) Image : vraie image d'abord, secours seulement si elle manque ---------- */
-  if (img) {
-    const fallback = img.getAttribute('data-fallback-src');
-    let fallbackUsed = false;
-
-    const useFallback = () => {
-      if (!fallback || fallbackUsed) return;
-      fallbackUsed = true;
-      img.src = fallback;
-      img.alt = 'Vie étudiante au Maroc';
-    };
-
-    img.addEventListener('error', useFallback);
-    // L'erreur a pu se produire avant que le script soit prêt
-    if (img.complete && img.naturalWidth === 0 && img.getAttribute('src')) useFallback();
-  }
-
-  /* ---------- 2) Vidéo : valide = lecteur au clic, sinon on renvoie vers le profil ---------- */
+  /* ---------- 1) Pas de vidéo valide : la colonne reste masquée ---------- */
   const match = (link.getAttribute('href') || '').match(/\/video\/(\d+)/);
-
-  if (!match) {
-    const profile = link.getAttribute('data-profile-url');
-    if (profile) link.setAttribute('href', profile);
-    if (card) card.classList.add('is-no-video');
-    link.setAttribute('aria-label', 'Voir notre compte TikTok');
-    return;
-  }
+  if (!match) return;
 
   const videoId = match[1];
+  const card = link.closest('.tiktok-card');
+  const visual = link.closest('.tiktok-visual');
+  const grid = link.closest('.tiktok-grid');
 
+  // Vidéo valide : on affiche la colonne image/vidéo
+  if (visual) visual.hidden = false;
+  if (grid) grid.classList.remove('is-text-only');
+
+  /* ---------- 2) Image : si l'aperçu est introuvable, on le retire (le fond rose reste) ---------- */
+  const img = link.querySelector('img');
+  if (img) {
+    const hideImg = () => { img.style.display = 'none'; };
+    img.addEventListener('error', hideImg);
+    // L'erreur a pu se produire avant que le script soit prêt
+    if (img.complete && img.naturalWidth === 0 && img.getAttribute('src')) hideImg();
+  }
+
+  /* ---------- 3) Vidéo : lecteur TikTok au clic ---------- */
   link.addEventListener('click', (event) => {
     // Laisse le comportement normal pour Ctrl/Cmd/Maj + clic et clic molette
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.button === 1) return;
