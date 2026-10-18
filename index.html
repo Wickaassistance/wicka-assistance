@@ -537,19 +537,29 @@
     </section>
 
     <!-- ============================================================
-         SECTION TIKTOK : aperçu local, la vidéo ne se charge qu'au clic (js/tiktok.js)
-         À remplacer : @willou_osean (partout), VOTRE_VIDEO_ID, puis déposer assets/images/tiktok-preview.jpg
-         (tant que ce fichier manque, assets/uni/student-portrait.jpg s'affiche à la place : data-fallback-src)
+         SECTION TIKTOK
+         - Tant qu'aucune vidéo n'est renseignée : seuls le texte et les boutons sont affichés
+           (la colonne image/vidéo reste masquée : attribut hidden + classe is-text-only).
+         - Pour activer la vidéo : remplacer le href du lien class="tiktok-play" (data-tiktok-play)
+           par https://www.tiktok.com/@willou_osean/video/NUMERO_DE_LA_VIDEO
+           puis déposer assets/images/tiktok-preview.jpg (sans cette image : fond dégradé rose + ▶).
+           js/tiktok.js détecte alors la vidéo et affiche la colonne tout seul.
+         - La vidéo ne se charge qu'au clic sur ▶ (aucune requête vers TikTok au chargement).
          ============================================================ -->
     <section class="tiktok-section" id="tiktok">
       <div class="container">
-        <div class="tiktok-grid">
+        <div class="tiktok-grid is-text-only">
           <div class="tiktok-text">
             <span class="section-badge"><i class="fab fa-tiktok"></i> Suivez-nous sur TikTok</span>
-            <h2 class="section-title">Découvrez la vie étudiante au Maroc en vidéo</h2>
+            <h2 class="section-title">La vie étudiante au Maroc, racontée par notre gérante</h2>
             <p>
-              Campus, quotidien des étudiants, conseils d'admission et de visa : retrouvez toutes nos vidéos sur TikTok
-              <span class="tiktok-handle">@willou_osean</span>.
+              Le compte TikTok <span class="tiktok-handle">@willou_osean</span> est celui de la gérante de Wicka
+              Assistance, visage de la société. Elle vit et étudie elle-même au Maroc : vous y découvrez son
+              quotidien, sans mise en scène.
+            </p>
+            <p>
+              Campus, logement, budget, ambiance en ville, mais aussi conseils concrets sur les démarches
+              d'admission et de visa : une façon simple de vous projeter avant de partir.
             </p>
             <div class="tiktok-actions">
               <a href="https://www.tiktok.com/@willou_osean" target="_blank" rel="noopener noreferrer" class="btn-tiktok">
@@ -561,10 +571,10 @@
             </div>
           </div>
 
-          <div class="tiktok-visual">
+          <div class="tiktok-visual" hidden>
             <div class="tiktok-card">
-              <a href="https://www.tiktok.com/@willou_osean" target="_blank" rel="noopener noreferrer" class="tiktok-play" data-tiktok-play data-profile-url="https://www.tiktok.com/@willou_osean" aria-label="Lire la vidéo TikTok">
-                <img src="assets/images/tiktok-preview.jpg" data-fallback-src="assets/uni/student-portrait.jpg" alt="Aperçu de notre dernière vidéo TikTok" width="540" height="960" loading="lazy" />
+              <a href="https://www.tiktok.com/@willou_osean" target="_blank" rel="noopener noreferrer" class="tiktok-play" data-tiktok-play aria-label="Lire la vidéo TikTok">
+                <img src="assets/images/tiktok-preview.jpg" alt="Aperçu de notre dernière vidéo TikTok" width="540" height="960" loading="lazy" />
                 <span class="tiktok-play-btn"><i class="fas fa-play"></i></span>
                 <span class="tiktok-card-tag"><i class="fab fa-tiktok"></i> @willou_osean</span>
               </a>
@@ -797,7 +807,7 @@
   <!-- Scripts -->
   <script src="js/data.js"></script>
   <script src="js/main.js"></script>
-  <!-- Section TikTok (vidéo chargée au clic) -->
+  <!-- Section TikTok (affiche la colonne vidéo seulement s'il y a une vidéo, chargée au clic) -->
   <script src="js/tiktok.js"></script>
 
   <aside class="cookie-banner" data-cookie-banner role="dialog" aria-labelledby="cookie-title" aria-describedby="cookie-description" hidden>
