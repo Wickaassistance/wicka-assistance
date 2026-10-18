@@ -1,3 +1,5 @@
+import { parseSiteUrls, pickSiteOrigin } from '../server/site-urls.js';
+
 const BREVO_ENDPOINT = 'https://api.brevo.com/v3/smtp/email';
 const BRAND = {
   rose: '#9f1239', roseDark: '#881337', gold: '#f59e0b', ink: '#1f2937',
@@ -19,20 +21,35 @@ function requiredText(value, label, max = 4000) {
   if (!result) throw new Error(`${label} est obligatoire.`);
   return result;
 }
-function config() {
+/** Origine réelle de la requête (Vercel) : domaine visité, donc toujours une URL qui fonctionne. */
+function requestOrigin(req) {
+  const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0].trim();
+  const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0].trim();
+  return host ? `${proto}://${host}` : '';
+}
+/**
+ * PUBLIC_SITE_URL peut contenir plusieurs adresses (séparées par des virgules) :
+ * on ne l'utilise jamais telle quelle pour fabriquer un lien.
+ */
+function config(req) {
   const required = ['BREVO_API_KEY', 'BREVO_FROM_EMAIL', 'BREVO_COMPANY_EMAIL'];
   const missing = required.filter((key) => !process.env[key]);
   if (missing.length) throw new Error(`Configuration Brevo manquante: ${missing.join(', ')}`);
   if (!validEmail(process.env.BREVO_FROM_EMAIL) || !validEmail(process.env.BREVO_COMPANY_EMAIL)) {
     throw new Error('Configuration Brevo invalide: vérifiez les adresses e-mail.');
   }
-  const siteUrl = text(process.env.PUBLIC_SITE_URL, 300).replace(/\/$/, '');
+  const base = pickSiteOrigin(process.env.PUBLIC_SITE_URL, requestOrigin(req)).replace(/\/+$/, '');
+  const configuredLogo = text(process.env.BREVO_LOGO_URL, 500);
+  const siteUrls = parseSiteUrls(process.env.PUBLIC_SITE_URL);
+  // Logo hébergé ailleurs que sur le site (CDN...) : utilisé tel quel.
+  // Logo hébergé sur l'un des domaines du site : reconstruit sur l'adresse qui fonctionne.
+  const logoIsExternal = configuredLogo !== '' && !siteUrls.some((u) => configuredLogo.startsWith(u));
   return {
     apiKey: process.env.BREVO_API_KEY,
     fromEmail: text(process.env.BREVO_FROM_EMAIL, 160),
     fromName: text(process.env.BREVO_FROM_NAME, 80) || 'Wicka Assistance',
     companyEmail: text(process.env.BREVO_COMPANY_EMAIL, 160),
-    logoUrl: text(process.env.BREVO_LOGO_URL, 500) || (siteUrl ? `${siteUrl}/assets/images/logo.png` : '')
+    logoUrl: logoIsExternal ? configuredLogo : (base ? `${base}/assets/images/logo.png` : configuredLogo)
   };
 }
 function emailLayout(title, content, cfg) {
@@ -108,10 +125,10 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Méthode non autorisée.' });
   try {
     const body = req.body && typeof req.body === 'object' ? req.body : {};
-    const cfg = config();
+    const cfg = config(req);
     const type = text(body.type, 20);
     if ((type === 'contact' || type === 'candidature') && body.consent !== 'accepted') {
-      return Response.json({ error: 'Le consentement est obligatoire.' }, { status: 400 });
+      return res.status(400).json({ error: 'Le consentement est obligatoire.' });
     }
     if (type === 'callback') { await sendBrevo(callbackEmail(body, cfg), cfg); return res.status(200).json({ ok: true }); }
     const emails = type === 'contact' ? contactEmails(body, cfg) : type === 'candidature' ? candidatureEmails(body, cfg) : null;
