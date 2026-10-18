@@ -1,3 +1,5 @@
+import { parseSiteUrls } from './site-urls.js';
+
 const BREVO_ENDPOINT = 'https://api.brevo.com/v3/smtp/email';
 const BRAND = {
   rose: '#9f1239', roseDark: '#881337', gold: '#f59e0b', ink: '#1f2937',
@@ -19,20 +21,29 @@ function requiredText(value, label, max = 4000) {
   if (!result) throw new Error(`${label} est obligatoire.`);
   return result;
 }
-function config(env) {
+/**
+ * `origin` = adresse du site réellement visitée (.com ou workers.dev), donc toujours une URL qui fonctionne.
+ * PUBLIC_SITE_URL peut contenir plusieurs adresses : on ne l'utilise jamais telle quelle pour fabriquer un lien.
+ */
+function config(env, origin) {
   const required = ['BREVO_API_KEY', 'BREVO_FROM_EMAIL', 'BREVO_COMPANY_EMAIL'];
   const missing = required.filter((key) => !env[key]);
   if (missing.length) throw new Error(`Configuration Brevo manquante: ${missing.join(', ')}`);
   if (!validEmail(env.BREVO_FROM_EMAIL) || !validEmail(env.BREVO_COMPANY_EMAIL)) {
     throw new Error('Configuration Brevo invalide: vérifiez les adresses e-mail.');
   }
-  const siteUrl = text(env.PUBLIC_SITE_URL, 300).replace(/\/$/, '');
+  const base = text(origin, 300).replace(/\/+$/, '');
+  const configuredLogo = text(env.BREVO_LOGO_URL, 500);
+  const siteUrls = parseSiteUrls(env.PUBLIC_SITE_URL);
+  // Logo hébergé ailleurs que sur le site (CDN...) : utilisé tel quel.
+  // Logo hébergé sur l'un des domaines du site : reconstruit sur l'adresse qui fonctionne.
+  const logoIsExternal = configuredLogo !== '' && !siteUrls.some((u) => configuredLogo.startsWith(u));
   return {
     apiKey: env.BREVO_API_KEY,
     fromEmail: text(env.BREVO_FROM_EMAIL, 160),
     fromName: text(env.BREVO_FROM_NAME, 80) || 'Wicka Assistance',
     companyEmail: text(env.BREVO_COMPANY_EMAIL, 160),
-    logoUrl: text(env.BREVO_LOGO_URL, 500) || (siteUrl ? `${siteUrl}/assets/images/logo.png` : '')
+    logoUrl: logoIsExternal ? configuredLogo : (base ? `${base}/assets/images/logo.png` : configuredLogo)
   };
 }
 function emailLayout(title, content, cfg) {
@@ -111,7 +122,8 @@ export async function onRequestPost(context) {
     const body = await context.request.json().catch(() => ({}));
     if (body.website) return Response.json({ ok: true });
     const env = context.env || {};
-    const cfg = config(env);
+    const origin = context.origin || new URL(context.request.url).origin;
+    const cfg = config(env, origin);
     const type = text(body.type, 20);
     if ((type === 'contact' || type === 'candidature') && body.consent !== 'accepted') {
       return Response.json({ error: 'Le consentement est obligatoire.' }, { status: 400 });
