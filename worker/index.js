@@ -1,4 +1,6 @@
 import { onRequestPost } from "../server/send-email.js";
+import { sendMonthlyBrevoCheck } from "../server/brevo-keepalive.js";
+import { siteOriginFor } from "../server/site-urls.js";
 
 const PAGES = [
   ["/", "1.0"],
@@ -54,8 +56,13 @@ function securityHeaders(response) {
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
+/**
+ * Origine publique du site pour cette requête.
+ * PUBLIC_SITE_URL peut contenir 1 à 3 adresses séparées par des virgules (.com, workers.dev...) :
+ * on prend celle qui correspond au domaine visité ; sinon l'origine de la requête (toujours une URL qui fonctionne).
+ */
 function siteOrigin(request, env) {
-  return String(env.PUBLIC_SITE_URL || new URL(request.url).origin).trim().replace(/\/$/, "");
+  return siteOriginFor(request, env.PUBLIC_SITE_URL);
 }
 
 function xmlEscape(value) {
@@ -173,9 +180,10 @@ export default {
     if (url.pathname === "/api/send-email") {
       if (request.method !== "POST") return securityHeaders(Response.json({ error: "Méthode non autorisée." }, { status: 405 }));
       if (!allowRequest(request)) return securityHeaders(Response.json({ error: "Trop de demandes. Réessayez plus tard." }, { status: 429, headers: { "retry-after": "60" } }));
+      // Origine acceptée : l'adresse du site (origin) OU l'origine réelle de la requête (.com, www, workers.dev).
       const originHeader = request.headers.get("Origin");
-      if (originHeader && originHeader !== origin) return securityHeaders(Response.json({ error: "Origine non autorisée." }, { status: 403 }));
-      return securityHeaders(await onRequestPost({ request, env }));
+      if (originHeader && originHeader !== origin && originHeader !== url.origin) return securityHeaders(Response.json({ error: "Origine non autorisée." }, { status: 403 }));
+      return securityHeaders(await onRequestPost({ request, env, origin }));
     }
     if (url.pathname === "/sitemap.xml") return securityHeaders(textResponse(sitemap(origin), "application/xml"));
     if (url.pathname === "/robots.txt") return securityHeaders(textResponse(`User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /merci\n\nSitemap: ${origin}/sitemap.xml\n`, "text/plain"));
@@ -185,5 +193,10 @@ export default {
     const contentType = response.headers.get("content-type") || "";
     if (contentType.includes("text/html")) return securityHeaders(rewriteHtml(response, origin, request));
     return securityHeaders(response);
+  },
+
+  // Cron (config wrangler : triggers.crons) : e-mail de contrôle Brevo une fois par mois (server/brevo-keepalive.js)
+  async scheduled(_event, env, ctx) {
+    ctx.waitUntil(sendMonthlyBrevoCheck(env));
   }
 };
