@@ -3,7 +3,12 @@
   "name": "wicka-assistance",
   "main": "./worker/index.js",
   "compatibility_date": "2026-10-15",
+  "keep_vars": true,
+  "triggers": {
+    "crons": ["0 9 1 * *"]
+  },
   "vars": {
+    "PUBLIC_SITE_URL": "https://wickaassistance.com,https://wickaassistance.wickaassistance.workers.dev",
     "BREVO_COMPANY_EMAIL": "wickaassistance@gmail.com"
   },
   "assets": {
