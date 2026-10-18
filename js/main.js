@@ -1,6 +1,10 @@
 /**
  * Wicka Assistance - Scripts et Logique Interactive (Version Enrichie)
- * Tarifs par Pays, Simulateur, Filtre Universités d'Élite, Transport Aéroport et Formulaire
+ * Tarifs par Pays, Simulateur, Filtre Universités d'Élite, Transport Aéroport et Formulaires
+ *
+ * FORMULAIRES : chaque formulaire envoie TOUS ses champs au serveur (/api/send-email -> e-mail Brevo),
+ * et la redirection WhatsApp de la candidature reprend elle aussi TOUS les champs.
+ * La liste des champs de chaque formulaire est décrite côté serveur dans server/send-email.js (FORMS).
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -288,7 +292,8 @@ function initCountryPricingSwitcher() {
       `).join('');
     }
 
-    // Update buttons in pricing cards as well
+    // Boutons « commander » des cartes de prix : redirection WhatsApp (aucun formulaire ici).
+    // Le message reprend toutes les informations choisies : pays, formule, prix affiché.
     document.querySelectorAll('.btn-order-pack').forEach(btn => {
       const packType = btn.getAttribute('data-pack');
       const price = packType === 'Pack Admission'
@@ -575,6 +580,9 @@ function initBudgetSimulator() {
   calculateBudget();
 }
 
+/* ============================================================
+   OUTILS COMMUNS AUX FORMULAIRES
+   ============================================================ */
 function isValidEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(value || '').trim());
 }
@@ -598,12 +606,43 @@ function validateContactValue(input) {
   return '';
 }
 
+/** Page d'où part le formulaire (ex. « /contact ») : jointe à l'e-mail pour savoir d'où vient la demande. */
+function currentPage() {
+  return window.location.pathname || '/';
+}
+
+/**
+ * Champ piège invisible (honeypot) : un visiteur ne le voit jamais, les robots le remplissent.
+ * Le serveur ignore silencieusement toute demande dont ce champ est rempli.
+ */
+function attachHoneypot(form) {
+  if (!form || form.querySelector('input[name="website"]')) return;
+  const trap = document.createElement('input');
+  trap.type = 'text';
+  trap.name = 'website';
+  trap.tabIndex = -1;
+  trap.autocomplete = 'off';
+  trap.setAttribute('aria-hidden', 'true');
+  trap.style.cssText = 'position:absolute;left:-10000px;width:1px;height:1px;opacity:0;pointer-events:none;';
+  form.appendChild(trap);
+}
+
+function honeypotValue(form) {
+  return form.querySelector('input[name="website"]')?.value || '';
+}
+
+/* ============================================================
+   FORMULAIRE DE CONTACT (page /contact)
+   Envoyé par e-mail avec TOUS ses champs : nom, e-mail, téléphone, sujet, message
+   + consentement et page d'origine.
+   ============================================================ */
 function initContactForm() {
   const form = document.getElementById('contactForm');
   if (!form) return;
   const status = document.getElementById('contactStatus');
   const submit = document.getElementById('contactSubmit');
   const fields = [...form.querySelectorAll('input:not([type="checkbox"]), textarea')];
+  attachHoneypot(form); // ajouté APRÈS la liste des champs : il n'est jamais validé ni affiché
   const showFieldError = (input) => {
     const error = validateContactValue(input);
     input.classList.toggle('field-error', Boolean(error));
@@ -627,10 +666,11 @@ function initContactForm() {
     if (submit) { submit.disabled = true; submit.classList.add('is-loading'); }
     if (status) status.textContent = 'Envoi en cours…';
     try {
+      // Tous les champs du formulaire (name, email, phone, subject, message, consent, website)
       const payload = Object.fromEntries(new FormData(form).entries());
       const response = await fetch('/api/send-email', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'contact', ...payload })
+        body: JSON.stringify({ ...payload, type: 'contact', page: currentPage() })
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Impossible d’envoyer le message.');
@@ -646,10 +686,49 @@ function initContactForm() {
 
 /* ============================================================
    6. FORMULAIRE DE CANDIDATURE MULTI-ÉTAPES
+   Envoyé par e-mail ET repris dans le message WhatsApp avec TOUS les champs :
+   nom, pays, niveau, série du bac, filière, ville, université, formule, navette,
+   précisions, WhatsApp, e-mail.
    ============================================================ */
+
+/** Message WhatsApp complet : tous les champs de la candidature. */
+function buildApplicationWhatsAppMessage(d) {
+  // Les précisions peuvent être très longues : l'URL WhatsApp est limitée, le texte complet part par e-mail.
+  const notes = d.notes
+    ? (d.notes.length > 300 ? `${d.notes.slice(0, 300)}… (suite envoyée par e-mail)` : d.notes)
+    : 'Aucune';
+  return [
+    'Bonjour Wicka Assistance ! Je viens de soumettre ma candidature.',
+    '',
+    '*Profil de l’étudiant*',
+    `Nom : ${d.fullName}`,
+    `Pays de résidence : ${d.country}`,
+    `Niveau d’études : ${d.currentLevel}`,
+    `Série du bac et mention : ${d.bacSeries}`,
+    '',
+    '*Projet au Maroc*',
+    `Filière : ${d.studyDomain}`,
+    `Ville souhaitée : ${d.targetCity}`,
+    `Université ciblée : ${d.targetUniversity}`,
+    '',
+    '*Formule et navette*',
+    `Formule : ${d.selectedPack}`,
+    `Navette aéroport : ${d.airportTransfer}`,
+    '',
+    '*Coordonnées*',
+    `WhatsApp : ${d.whatsapp}`,
+    `E-mail : ${d.email}`,
+    '',
+    `Précisions : ${notes}`,
+    '',
+    'Merci de m’indiquer la suite des démarches.'
+  ].join('\n');
+}
+
 function initMultiStepForm() {
   const form = document.getElementById('multiStepApplicationForm');
   if (!form) return;
+  attachHoneypot(form);
 
   // Préremplissage si l'utilisateur a choisi une université sur la page Universités
   try {
@@ -771,19 +850,20 @@ function initMultiStepForm() {
     e.preventDefault();
     if (!validateStep(currentStep)) return;
 
+    // TOUS les champs du formulaire
     const formData = {
       fullName: form.querySelector('#formFullName')?.value.trim() || '',
       country: form.querySelector('#formCountry')?.value || '',
-      whatsapp: form.querySelector('#formWhatsapp')?.value.trim() || '',
-      email: form.querySelector('#formEmail')?.value.trim() || '',
       currentLevel: form.querySelector('#formCurrentLevel')?.value || '',
-      bacSeries: form.querySelector('#formBacSeries')?.value || '',
+      bacSeries: form.querySelector('#formBacSeries')?.value.trim() || '',
       studyDomain: form.querySelector('#formStudyDomain')?.selectedOptions?.[0]?.text || form.querySelector('#formStudyDomain')?.value || '',
       targetCity: form.querySelector('#formTargetCity')?.value || '',
-      targetUniversity: form.querySelector('#formTargetUniversity')?.value || 'Recommandation Wicka',
+      targetUniversity: form.querySelector('#formTargetUniversity')?.value.trim() || 'Recommandation Wicka',
       selectedPack: form.querySelector('input[name="formPackChoice"]:checked')?.value || 'Pack Admission Réussie',
-      airportTransfer: form.querySelector('input[name="formAirportTransfer"]:checked')?.value || 'Oui, navette avec chauffeur privé demandée',
+      airportTransfer: form.querySelector('input[name="formAirportTransfer"]:checked')?.value || 'Oui, navette avec chauffeur demandée',
       notes: form.querySelector('#formNotes')?.value.trim() || '',
+      whatsapp: form.querySelector('#formWhatsapp')?.value.trim() || '',
+      email: form.querySelector('#formEmail')?.value.trim() || '',
       consent: form.querySelector('#applicationConsent')?.checked ? 'accepted' : ''
     };
     const submitButton = form.querySelector('button[type="submit"]');
@@ -792,12 +872,13 @@ function initMultiStepForm() {
     try {
       const response = await fetch('/api/send-email', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'candidature', ...formData })
+        body: JSON.stringify({ ...formData, type: 'candidature', page: currentPage(), website: honeypotValue(form) })
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Impossible d’envoyer la candidature.');
       try { sessionStorage.setItem('wickaApplication', JSON.stringify(formData)); } catch (error) { /* stockage indisponible */ }
-      const whatsappMessage = `Bonjour Wicka Assistance ! Je viens de soumettre ma candidature.\n\nNom : ${formData.fullName}\nPays : ${formData.country}\nWhatsApp : ${formData.whatsapp}\nFilière : ${formData.studyDomain}\nUniversité : ${formData.targetUniversity}\nFormule : ${formData.selectedPack}\n\nMerci de m’indiquer la suite des démarches.`;
+      // Redirection WhatsApp : message avec TOUS les champs
+      const whatsappMessage = buildApplicationWhatsAppMessage(formData);
       window.location.href = `https://wa.me/212789095498?text=${encodeURIComponent(whatsappMessage)}`;
     } catch (error) {
       showToastNotification(error.message || 'Une erreur est survenue. Réessayez.', 'warning');
@@ -812,30 +893,26 @@ function showSubmissionSuccessModal(data) {
   const whatsappBtn = document.getElementById('modalWhatsappRedirect');
 
   if (detailsBox) {
-    detailsBox.innerHTML = `
-      <div class="summary-row"><strong>Nom complet :</strong> <span>${data.fullName}</span></div>
-      <div class="summary-row"><strong>Pays de résidence :</strong> <span>${data.country}</span></div>
-      <div class="summary-row"><strong>Numéro WhatsApp :</strong> <span>${data.whatsapp}</span></div>
-      <div class="summary-row"><strong>Filière visée :</strong> <span>${data.studyDomain}</span></div>
-      <div class="summary-row"><strong>Université :</strong> <span>${data.targetUniversity}</span></div>
-      <div class="summary-row"><strong>Pack choisi :</strong> <span class="badge-rose-soft">${data.selectedPack}</span></div>
-      <div class="summary-row"><strong>Navette aéroport :</strong> <span>${data.airportTransfer}</span></div>
-    `;
+    // Toutes les valeurs saisies par le visiteur sont échappées avant d'être insérées dans la page.
+    const row = (label, value) => `<div class="summary-row"><strong>${label} :</strong> <span>${escapeHtml(value)}</span></div>`;
+    detailsBox.innerHTML = [
+      row('Nom complet', data.fullName),
+      row('Pays de résidence', data.country),
+      row('Niveau d’études', data.currentLevel),
+      row('Série du bac et mention', data.bacSeries),
+      row('Filière visée', data.studyDomain),
+      row('Ville souhaitée', data.targetCity),
+      row('Université', data.targetUniversity),
+      row('Formule choisie', data.selectedPack),
+      row('Navette aéroport', data.airportTransfer),
+      row('Numéro WhatsApp', data.whatsapp),
+      row('E-mail', data.email),
+      row('Précisions', data.notes || 'Aucune')
+    ].join('');
   }
 
   if (whatsappBtn) {
-    const waText = encodeURIComponent(
-      `Bonjour Wicka Assistance ! 👋\nJe viens de soumettre ma candidature pour étudier au Maroc.\n\n` +
-      `👤 Nom : ${data.fullName}\n` +
-      `🌍 Pays : ${data.country}\n` +
-      `🎓 Niveau : ${data.currentLevel} (${data.bacSeries})\n` +
-      `📚 Filière : ${data.studyDomain}\n` +
-      `🏫 Établissement : ${data.targetUniversity}\n` +
-      `📦 Formule : ${data.selectedPack}\n` +
-      `🚗 Navette Aéroport : ${data.airportTransfer}\n\n` +
-      `Merci de m'indiquer la suite des démarches !`
-    );
-    whatsappBtn.href = `https://wa.me/212789095498?text=${waText}`;
+    whatsappBtn.href = `https://wa.me/212789095498?text=${encodeURIComponent(buildApplicationWhatsAppMessage(data))}`;
   }
 
   if (modal) {
@@ -946,7 +1023,9 @@ window.showToastNotification = function(msg) {
 };
 
 /* ============================================================
-   10. MODALS
+   10. MODALS + DEMANDE DE RAPPEL
+   Formulaire de rappel : un seul champ (numéro WhatsApp / téléphone), envoyé par e-mail
+   avec la page d'origine.
    ============================================================ */
 function initModals() {
   const closeButtons = document.querySelectorAll('.modal-close-btn, .modal-close-btn-action, .modal-backdrop');
@@ -979,6 +1058,7 @@ function initModals() {
 
   const callbackForm = document.getElementById('callbackQuickForm');
   if (callbackForm) {
+    attachHoneypot(callbackForm);
     callbackForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const phoneInput = callbackForm.querySelector('input[type="tel"]');
@@ -993,7 +1073,7 @@ function initModals() {
       try {
         const response = await fetch('/api/send-email', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type: 'callback', phone })
+          body: JSON.stringify({ type: 'callback', phone, page: currentPage(), website: honeypotValue(callbackForm) })
         });
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(data.error || 'Impossible d’envoyer la demande.');
