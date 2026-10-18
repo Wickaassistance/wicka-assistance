@@ -18,7 +18,7 @@ const RATE_LIMIT_MAX = 8;
 // Profil TikTok : à remplacer par le vrai lien (même valeur que dans public/index.html).
 // Le Worker ajoute l'icône TikTok au footer de TOUTES les pages qui ont un bloc .footer-social-links
 // (si l'icône y est déjà, comme sur l'accueil, il n'en ajoute pas une seconde).
-const TIKTOK_URL = "https://www.tiktok.com/@VOTRE_COMPTE";
+const TIKTOK_URL = "https://www.tiktok.com/@willou_osean";
 const TIKTOK_ICON_HTML = `<a href="${TIKTOK_URL}" target="_blank" rel="noopener noreferrer" class="social-icon-btn" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>`;
 
 function requestKey(request) {
