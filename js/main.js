@@ -8,6 +8,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('[data-current-year]').forEach((el) => { el.textContent = String(new Date().getFullYear()); });
   // 1. Initialisations
   initNavigation();
   initCounters();
